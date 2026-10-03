@@ -83,8 +83,7 @@ def main():
         rendered = PACKET.sub(lambda match: match[1] + payload + match[3], template)
         output.parent.mkdir(parents=True, exist_ok=True)
         with tempfile.NamedTemporaryFile(
-            "w", encoding="utf-8", newline="
-", dir=output.parent, delete=False
+            "w", encoding="utf-8", newline="\n", dir=output.parent, delete=False
         ) as handle:
             temporary = Path(handle.name)
             handle.write(rendered)
