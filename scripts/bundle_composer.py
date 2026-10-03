@@ -18,6 +18,9 @@ UNSUPPORTED = [
     (re.compile(r"^export\s+default\b", re.M), "default exports are not supported"),
     (re.compile(r"^export\s+\*", re.M), "export-star is not supported"),
     (re.compile(r"\bimport\s*\("), "dynamic import is not supported"),
+    (re.compile(r"\bimport\.meta\b"), "import.meta is not supported"),
+    (re.compile(r"^export\s+(?:const|let|var)\s*[\[{]", re.M), "destructured exports are not supported"),
+    (re.compile(r"^export\s+var\b", re.M), "export var is not supported; use const or let"),
     (re.compile(r"^import\s+(?!\{|\*)", re.M), "unsupported import form"),
     (re.compile(r"^\s*import\s*\{[^}]*$", re.M), "multi-line imports are not supported"),
 ]
@@ -47,6 +50,7 @@ def transform(rel: str, source: str, src: Path):
             raise ValueError(f"{rel}: {message}")
     deps = []
     exports = []
+    needed = []  # (target module, imported name) pairs, checked once every module is known
 
     def replace_import(match):
         target = resolve(rel, match.group("path"))
@@ -58,6 +62,7 @@ def transform(rel: str, source: str, src: Path):
             return f'const {spec[5:].strip()} = __modules["{target}"];'
         if spec.startswith("{") and spec.endswith("}"):
             names = [n.strip() for n in spec[1:-1].split(",") if n.strip()]
+            needed.extend((target, n.split(" as ")[0].strip()) for n in names)
             fields = ", ".join(n.replace(" as ", ": ") for n in names)
             return f'const {{ {fields} }} = __modules["{target}"];'
         raise ValueError(f"{rel}: unsupported import form: {spec}")
@@ -79,23 +84,28 @@ def transform(rel: str, source: str, src: Path):
     body = re.sub(r"^export\s+(?=(?:async\s+)?(?:const|let|function|class)\b)", "", body, flags=re.M)
     if re.search(r"^export\b", body, re.M):
         raise ValueError(f"{rel}: unsupported export form")
-    return body, deps, exports
+    return body, deps, exports, needed
 
 
 def bundle_js(src: Path, entry: str = ENTRY) -> str:
     modules = {}
+    requirements = []
 
     def visit(rel, stack):
         if rel in modules:
             return
         if rel in stack:
             raise ValueError("import cycle: " + " -> ".join(stack[stack.index(rel):] + [rel]))
-        body, deps, exports = transform(rel, read(src / rel), src)
+        body, deps, exports, needed = transform(rel, read(src / rel), src)
+        requirements.extend((rel, target, name) for target, name in needed)
         for dep in deps:
             visit(dep, stack + [rel])
         modules[rel] = (body, exports)
 
     visit(entry, [])
+    for importer, target, name in requirements:
+        if name not in modules[target][1]:
+            raise ValueError(f"{importer}: {target} does not export {name}")
     out = ['"use strict";', "(() => {", "const __modules = Object.create(null);"]
     for rel, (body, exports) in modules.items():
         out.append(f'__modules["{rel}"] = (() => {{')

@@ -50,7 +50,7 @@ export function compilePrompt(ws, bundle, context = null) {
     const incoming = wf.handoffs.filter(h => h.to === id).map(h => byId.get(h.from));
     lines.push(
       `Step ${i + 1}: ${s.label || p.title}`, `Skill: ${entry.path}`, `Step ID: ${s.id}`,
-      "Inputs: " + (incoming.length ? incoming.map(x => `${x.label} [${x.id}] → ${x.output}`).join("; ") : "Shared goal and available project context"),
+      "Inputs: " + (incoming.length ? incoming.map(x => `${x.label.trim() || presentation(x.skill, catalog).title} [${x.id}] → ${x.output.trim()}`).join("; ") : "Shared goal and available project context"),
       "Output: " + s.output.trim(), "Instructions: " + s.instructions);
     if (p.option) lines.push(`${p.optionLabel}: ${s.options[p.option]}`);
     lines.push("Model: " + (s.model.trim() || "Inherit project role defaults and host"), "Reasoning effort: " + (s.effort || "Inherit project role defaults and host"), "");

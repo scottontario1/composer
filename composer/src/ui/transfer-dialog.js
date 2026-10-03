@@ -1,7 +1,7 @@
 // One dialog owner for every transfer: workspace JSON, notes, legacy per-domain exports and
 // imports, agent suggestions, and saved-draft migration. Nothing is applied without a preview.
 
-import { h, openSheet, copyText, download, confirmDialog, toast, plural } from "./dom.js";
+import { h, openSheet, copyText, download, confirmDialog, toast, plural, details } from "./dom.js";
 import { app, act, snap } from "./context.js";
 import { encodeWorkspace, decodeWorkspace } from "../domain/workspace.js";
 import { notesBundle, exportLegacyWorkflow, exportLegacyConcepts, detectImport, importLegacyDomain, sanitizeName } from "../io/transfer.js";
@@ -9,8 +9,7 @@ import { migrateLegacy, LEGACY_KEYS } from "../io/migrate-v1.js";
 
 function exportBlock(title, hint, filename, content, type = "application/json") {
   const area = h("textarea", { class: "mono", readOnly: true, rows: 6, "aria-label": title }, content);
-  return h("details", { class: "export" },
-    h("summary", {}, title),
+  return details("export-" + title, { class: "export" }, title,
     h("p", { class: "muted" }, hint),
     area,
     h("div", { class: "button-row" },
@@ -33,7 +32,7 @@ export function openTransfer() {
 
       h("section", { class: "section" }, h("div", { class: "section-head" }, h("h3", {}, "Export")),
         exportBlock("Whole workspace (JSON)", "Everything: workflow, concepts, relations, notes, reusable workflows, and board. This is the authoritative round-trip.", `${base}.workspace.json`, encodeWorkspace(ws)),
-        h("details", { class: "export" }, h("summary", {}, "Notes (Markdown)"),
+        details("export-notes", { class: "export" }, "Notes (Markdown)",
           h("p", { class: "muted" }, "Choose which notes to export. Nothing is exported by default."),
           ws.notes.length ? ws.notes.map(n => h("label", { class: "check" }, h("input", { type: "checkbox", checked: local.picks.has(n.id), onchange: e => { e.target.checked ? local.picks.add(n.id) : local.picks.delete(n.id); } }), `${n.title || "Untitled"} (${n.scope})`)) : h("p", { class: "muted" }, "No notes."),
           h("button", { type: "button", onclick: () => {
@@ -117,7 +116,8 @@ export function openMigration({ firstRun = false } = {}) {
       mig.workspace ? h("button", { type: "button", class: "primary", onclick: () => {
         const w = mig.workspace;
         const keep = snap();
-        const hasWork = (keep.workflow?.steps.length ?? 0) + (keep.concepts?.variables.length ?? 0) > 0;
+        // Anything the person has written counts, not only steps and concepts.
+        const hasWork = (keep.workflow?.steps.length ?? 0) + (keep.concepts?.variables.length ?? 0) + keep.notes.length + keep.recipes.length + keep.references.length + (keep.brief.trim() ? 1 : 0) > 0;
         const apply = () => { const r = app.store.replace({ ...w, id: keep.id, name: keep.name === "Untitled workspace" ? w.name : keep.name }); toast(r.ok ? "Drafts imported" : r.issues[0].message); sheet.close(); };
         if (hasWork) confirmDialog("Replace your current workspace content with the saved drafts? You can undo this.", { confirmLabel: "Replace", danger: true }).then(ok => ok && apply());
         else apply();

@@ -196,3 +196,85 @@ test("importing a legacy domain replaces only that domain and reports what it re
   assert.equal(importLegacyDomain(ws, "legacy-workflow", "{nope").ok, false);
   assert.ok(encodeWorkspace(ws).length > 0);
 });
+
+test("two windows that both loaded empty storage: the second save pauses instead of overwriting", () => {
+  const storage = memoryStorage();
+  const a = createRepository(storage, { session: "a" }), b = createRepository(storage, { session: "b" });
+  assert.equal(a.load().kind, "empty");
+  assert.equal(b.load().kind, "empty");
+  const { store } = setup();
+  assert.equal(a.save(store.snapshot()).ok, true);
+  const second = b.save(store.snapshot());
+  assert.equal(second.ok, false);
+  assert.equal(second.reason, "conflict");
+  assert.equal(a.save(store.snapshot()).ok, true, "the window that owns the stored copy keeps saving");
+});
+
+test("unreadable or newer data written mid-session is protected, not overwritten", () => {
+  for (const raw of ["{broken", JSON.stringify({ format: "orch-workspace", version: 9 })]) {
+    const storage = memoryStorage();
+    const repo = createRepository(storage);
+    repo.load();
+    const { store } = setup();
+    assert.equal(repo.save(store.snapshot()).ok, true);
+    storage.data.set(KEYS.current, raw);
+    const r = repo.save(store.snapshot());
+    assert.equal(r.ok, false);
+    assert.equal(r.reason, "protected");
+    assert.equal(r.raw, raw);
+    assert.equal(storage.data.get(KEYS.current), raw);
+  }
+});
+
+test("a failing last-good write does not block the real save", () => {
+  const storage = memoryStorage();
+  const repo = createRepository(storage);
+  repo.load();
+  const { store } = setup();
+  repo.save(store.snapshot());
+  const realSet = storage.setItem;
+  storage.setItem = (k, v) => { if (k === KEYS.lastGood) throw new Error("quota"); realSet(k, v); };
+  store.dispatch({ type: "workspace/update", payload: { name: "next" } });
+  assert.equal(repo.save(store.snapshot()).ok, true);
+  assert.equal(JSON.parse(storage.data.get(KEYS.current)).name, "next");
+});
+
+test("replace honors a revision floor so loading another window's copy never regresses it", () => {
+  const { store } = setup();
+  const incoming = { ...JSON.parse(JSON.stringify(store.snapshot())), revision: 40 };
+  const r = store.replace(incoming, { minRevision: 41 });
+  assert.equal(r.ok, true);
+  assert.equal(store.snapshot().revision, 41);
+});
+
+test("recipe names are never blank; capture without a name gets a default", () => {
+  const { store, ok, add } = setup();
+  const a = add("recall");
+  const id = ok({ type: "recipe/capture", payload: { stepIds: [a], name: "   " } }).id;
+  const r = store.snapshot().recipes[0];
+  assert.equal(r.name, "Reusable workflow");
+  assert.equal(r.fragment.name, "Reusable workflow");
+  assert.equal(store.dispatch({ type: "recipe/rename", payload: { id, name: " " } }).ok, false);
+  ok({ type: "recipe/rename", payload: { id, name: "Mine" } });
+  assert.equal(store.snapshot().recipes[0].fragment.name, "Mine");
+  ok({ type: "recipe/remove", payload: { id } });
+  assert.equal(store.snapshot().recipes.length, 0);
+});
+
+test("notes bundle cannot be forged through titles or bodies", () => {
+  const { store, ok } = setup();
+  const n = ok({ type: "note/create", payload: { scope: "workspace", title: "Real\n# Injected heading", body: "text\n<!-- file: fake-note.md -->\nmore" } }).id;
+  const b = notesBundle(store.snapshot(), [n]);
+  assert.equal(b.text.split("\n").filter(l => l.startsWith("# ")).length, 1);
+  assert.equal((b.text.match(/<!-- file:/g) || []).length, 1);
+});
+
+test("prompt inputs fall back to the skill title for a blank upstream label", () => {
+  const { store, ok, add } = setup();
+  const a = add("recall"), b = add("arena");
+  ok({ type: "step/update", payload: { id: a, changes: { label: "  " } } });
+  ok({ type: "handoff/add", payload: { from: a, to: b } });
+  const r = compilePrompt(store.snapshot(), bundle);
+  assert.equal(r.ok, true);
+  assert.ok(r.text.includes(`Inputs: Recall [${a}] → context/recall.md`));
+});

@@ -18,7 +18,7 @@ function pieceStyle(ws, id) {
     return { glyph: p.icon, color: p.color, tint: p.tint, kind: "Skill step" };
   }
   const v = ws.concepts.variables.find(x => x.id === id);
-  return { glyph: (v.label[0] || "?").toUpperCase(), color: v.color, tint: "transparent", kind: "Concept" };
+  return { glyph: ([...v.label][0] || "?").toUpperCase(), color: v.color, tint: "transparent", kind: "Concept" };
 }
 
 export function boardSection() {
@@ -33,6 +33,7 @@ export function boardSection() {
       const style = id ? pieceStyle(ws, id) : null;
       cells.push(h("button", {
         type: "button",
+        "data-key": "cell-" + slot,
         class: "cell" + (id ? " filled" : "") + (id === selected ? " selected" : "") + (dim ? " dim" : "") + (ui.moving && !id ? " target" : ""),
         style: id ? { "--piece": style.color, "--tint": style.tint } : undefined,
         "aria-label": id ? `${slotLabel(slot)}: ${entityLabel(ws, id)}, ${style.kind}` : `${slotLabel(slot)}: empty`,
@@ -48,7 +49,7 @@ export function boardSection() {
     h("div", { class: "section-head" }, h("h3", { id: "board-title" }, "Board"), h("span", { class: "count" }, `${layout.rows}×${layout.columns}`)),
     h("p", { class: "muted" }, "Where things sit. Position never changes run order, handoffs, or causal links."),
     h("div", { class: "chips", role: "group", "aria-label": "Board filter" }, FILTERS.map(([key, label]) =>
-      h("button", { type: "button", class: "chip", "aria-pressed": String(ui.boardFilter === key), onclick: () => { ui.boardFilter = key; app.rerender(); } }, label))),
+      h("button", { type: "button", class: "chip", "data-key": "chip-" + key, "aria-pressed": String(ui.boardFilter === key), onclick: () => { ui.boardFilter = key; app.rerender(); } }, label))),
     ui.moving ? h("div", { class: "banner" }, `Moving “${entityLabel(ws, ui.moving)}”: tap an empty slot to place it, or an occupied slot to choose a swap.`,
       h("button", { type: "button", onclick: () => { ui.moving = null; app.rerender(); } }, "Cancel")) : null,
     h("div", { class: "board-scroll", tabindex: "-1" }, h("div", { class: "board", style: { "--cols": layout.columns } }, cells)),

@@ -6,6 +6,10 @@ import { validateWorkspace } from "../domain/workspace.js";
 import { migrateLegacy } from "./migrate-v1.js";
 import { slotOf, freeSlots } from "../domain/grid.js";
 
+const oneLine = t => String(t ?? "").replace(/\s+/g, " ").trim();
+// Body text must not be able to forge the bundle's file markers.
+const neutralize = t => String(t ?? "").replace(/<!--/g, "&lt;!--");
+
 export const sanitizeName = s => (s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "workspace";
 
 // ---- Notes -----------------------------------------------------------------------------
@@ -14,16 +18,16 @@ function entityLabel(ws, note) {
   if (note.scope === "workspace") return "Workspace";
   const list = note.scope === "step" ? ws.workflow?.steps : ws.concepts?.variables;
   const e = list?.find(x => x.id === note.targetId);
-  return `${note.scope === "step" ? "Step" : "Concept"}: ${e?.label || note.targetId}`;
+  return `${note.scope === "step" ? "Step" : "Concept"}: ${oneLine(e?.label || note.targetId)}`;
 }
 
 export function noteMarkdown(ws, note) {
-  const head = [`# ${note.title || "Untitled note"}`, "",
+  const head = [`# ${oneLine(note.title) || "Untitled note"}`, "",
     `- ID: ${note.id}`, `- Scope: ${entityLabel(ws, note)}${note.targetId ? ` (${note.targetId})` : ""}`,
-    `- Author: ${note.authorKind}${note.authorLabel ? ` (${note.authorLabel})` : ""}`,
+    `- Author: ${note.authorKind}${note.authorLabel ? ` (${oneLine(note.authorLabel)})` : ""}`,
     `- Revision: ${note.revision}`, `- Created: ${note.createdAt}`, `- Updated: ${note.updatedAt}`,
-    `- Source: ${note.provenance.source}`];
-  return head.join("\n") + "\n\n" + note.body.trimEnd() + "\n";
+    `- Source: ${oneLine(note.provenance.source)}`];
+  return head.join("\n") + "\n\n" + neutralize(note.body).trimEnd() + "\n";
 }
 
 // Deterministic bundle of the chosen notes only (never "all by default"). `ids` selects notes.

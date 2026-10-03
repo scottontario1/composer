@@ -209,15 +209,18 @@ export function createStore(initial = null, { idGen = defaultId, clock = () => n
 
     "recipe/capture": (ws, { stepIds, name }) => {
       const wf = requireWorkflow(ws);
-      const { fragment, issues } = captureRecipe(wf, stepIds ?? [], name ?? "");
+      const label = (name ?? "").trim() || "Reusable workflow";
+      const { fragment, issues } = captureRecipe(wf, stepIds ?? [], label);
       if (issues.length) throw new CommandError(issues);
       const id = newId(ws);
-      ws.recipes.push({ id, revision: 1, name: name || "Reusable workflow", fragment });
+      ws.recipes.push({ id, revision: 1, name: label, fragment });
       return { id };
     },
     "recipe/rename": (ws, { id, name }) => {
       const r = find(ws.recipes, id, "Recipe");
-      r.name = name; r.fragment.name = name; r.revision += 1;
+      const label = (name ?? "").trim();
+      if (!label) reject("recipe.name", "A reusable workflow needs a name.", id);
+      r.name = label; r.fragment.name = label; r.revision += 1;
     },
     "recipe/remove": (ws, { id }) => {
       find(ws.recipes, id, "Recipe");
@@ -311,11 +314,11 @@ export function createStore(initial = null, { idGen = defaultId, clock = () => n
   }
 
   // Replace the whole document (import, migration accept). Validated, undoable, revision advances.
-  function replace(next) {
+  function replace(next, { minRevision = 0 } = {}) {
     const problems = validateWorkspace(next);
     if (problems.length) return { ok: false, issues: problems };
     const draft = clone(next);
-    draft.revision = current.revision + 1;
+    draft.revision = Math.max(current.revision + 1, minRevision);
     draft.lastWriter = session;
     redoStack.length = 0;
     return commit(draft);

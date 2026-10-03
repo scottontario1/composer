@@ -147,8 +147,13 @@ export function openStepSheet(id) {
 
 function duplicateStep(id) {
   const ws = snap(), s = ws.workflow.steps.find(x => x.id === id);
-  const out = s.output.includes(".") ? s.output.replace(/(\.[^./]+)$/, "-copy$1") : s.output + "-copy";
-  const r = act({ type: "step/add", payload: { step: { skill: s.skill, label: s.label + " copy", instructions: s.instructions, output: out, model: s.model, effort: s.effort, options: s.options } } }, "Step duplicated");
+  // Suffix the final path segment (before its extension) and keep trying until the output is free.
+  const taken = new Set(ws.workflow.steps.map(x => x.output.trim().toLowerCase()));
+  const suffixed = n => s.output.replace(/([^/]*?)(\.[^./]+)?$/, (_, base, ext = "") => `${base}-copy${n > 1 ? "-" + n : ""}${ext}`);
+  let n = 1;
+  while (taken.has(suffixed(n).toLowerCase())) n++;
+  const out = suffixed(n);
+  const r = act({ type: "step/add", payload: { step: { skill: s.skill, label: (s.label + " copy").slice(0, 200), instructions: s.instructions, output: out, model: s.model, effort: s.effort, options: s.options } } }, "Step duplicated");
   if (r.ok) openStepSheet(r.id);
 }
 
@@ -186,13 +191,16 @@ function relRow(ws, l, dir) {
 
 // "Add causal relation" form, reused from concept sheets and the Loops view. Its in-progress
 // values live at module level so a re-render (for example after choosing "From") keeps them.
-const causalDraft = { from: "", to: "", sign: "1", delayed: false, label: "" };
+// The Loops-page form and each concept sheet keep separate drafts so they do not disturb each other.
+const causalDrafts = new Map();
 
 export function causalForm(ws, fixedFrom = null) {
   const vars = ws.concepts?.variables ?? [];
   if (vars.length < 2) return h("p", { class: "muted" }, "Add at least two concepts to relate them.");
   const ids = vars.map(v => v.id);
-  const d = causalDraft;
+  const draftKey = fixedFrom ?? "*";
+  if (!causalDrafts.has(draftKey)) causalDrafts.set(draftKey, { from: "", to: "", sign: "1", delayed: false, label: "" });
+  const d = causalDrafts.get(draftKey);
   if (fixedFrom) d.from = fixedFrom;
   if (!ids.includes(d.from)) d.from = ids[0];
   if (!ids.includes(d.to) || d.to === d.from) d.to = ids.find(id => id !== d.from);

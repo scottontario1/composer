@@ -1,7 +1,7 @@
 // Bootstrap: loads or creates the workspace, wires the shell (header, tabs, banners), re-renders
 // from store snapshots, autosaves through the repository, and protects unreadable drafts.
 
-import { $, h, clear, toast, confirmDialog, download, captureFocus, restoreFocus, refreshSheets, hasOpenSheet } from "./dom.js";
+import { $, h, clear, toast, confirmDialog, download, captureFocus, restoreFocus, refreshSheets, hasOpenSheet, whenIdle } from "./dom.js";
 import { app, snap, act } from "./context.js";
 import { createStore } from "../store/workspace-store.js";
 import { createRepository } from "../io/local-repository.js";
@@ -57,9 +57,14 @@ function renderBanners() {
     host.append(h("div", { class: "banner warn", role: "alert" },
       h("strong", {}, "Another window changed this workspace."), " Saving is paused so nothing is overwritten.",
       h("button", { type: "button", onclick: () => {
-        app.repo.release();
         const l = app.repo.load();
-        if (l.kind === "ok") { app.store.replace(l.workspace); app.conflict = false; toast("Loaded the other window’s version"); render(); }
+        if (l.kind !== "ok") { toast("The other window’s copy can’t be read here. Download yours, or keep yours and overwrite."); return; }
+        app.repo.release();
+        // Never let the stored revision move backwards: the loaded copy's revision is a floor.
+        app.store.replace(l.workspace, { minRevision: l.workspace.revision + 1 });
+        app.conflict = false;
+        toast("Loaded the other window’s version");
+        render();
       } }, "Load their version"),
       h("button", { type: "button", onclick: () => download(`${snap().name || "workspace"}.json`, JSON.stringify(snap(), null, 2)) }, "Download mine"),
       h("button", { type: "button", class: "danger-quiet", onclick: () => { app.repo.release(); app.conflict = false; scheduleSave(); render(); } }, "Keep mine and overwrite")));
@@ -88,7 +93,7 @@ function render() {
 function scheduleRender() {
   if (renderQueued) return;
   renderQueued = true;
-  queueMicrotask(render);
+  queueMicrotask(() => whenIdle("main", render));
 }
 
 // ---- Saving ------------------------------------------------------------------------------
@@ -101,11 +106,17 @@ function setStatus(text) {
 function scheduleSave() {
   setStatus("Saving…");
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    const r = app.repo.save(snap());
-    setStatus(r.status);
-    if (r.reason === "conflict" && !app.conflict) { app.conflict = true; render(); }
-  }, 250);
+  saveTimer = setTimeout(saveNow, 250);
+}
+
+function saveNow() {
+  clearTimeout(saveTimer);
+  saveTimer = null;
+  const r = app.repo.save(snap());
+  setStatus(r.status);
+  if (r.reason === "conflict" && !app.conflict) { app.conflict = true; render(); }
+  // Stored data turned unreadable (or newer) while this window was open: protect it like a failed load.
+  if (r.reason === "protected" && !app.protectedDraft) { app.protectedDraft = { raw: r.raw, reason: "changed" }; render(); }
 }
 
 // ---- Boot --------------------------------------------------------------------------------
@@ -145,6 +156,10 @@ function boot() {
     if (e.key.toLowerCase() === "z") { e.preventDefault(); e.shiftKey ? app.store.redo() : app.store.undo(); }
     else if (e.key.toLowerCase() === "y") { e.preventDefault(); app.store.redo(); }
   });
+  // Do not lose a pending autosave when the tab is hidden or closed.
+  const flush = () => { if (saveTimer && !app.protectedDraft && !app.conflict) saveNow(); };
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(); });
+  window.addEventListener("pagehide", flush);
   window.addEventListener("storage", e => {
     if (e.key === "orch.workspace.v2" && !app.protectedDraft) scheduleSave();
   });

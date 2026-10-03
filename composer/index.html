@@ -182,7 +182,7 @@ button.link { min-width: 44px; }
 <main id="main" role="tabpanel" tabindex="-1"></main>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <noscript><p style="padding:16px">Composer needs JavaScript. Open this file in a current browser.</p></noscript>
-<script id="orch-bundle" type="application/json">{"version":1,"skills":[{"name":"architect","description":"Settle caller-facing interfaces, data shapes, ownership, and module boundaries through competing design sketches before consequential implementation. Use for architecture requests or changes whose shape needs deliberate design.","path":"skills/architect/SKILL.md"},{"name":"arena","description":"Generate independent candidates for the same design, code, or writing task, compare them against a rubric, and synthesize one artifact. Use for competing proposals or an explicit arena request.","path":"skills/arena/SKILL.md"},{"name":"how","description":"Explain subsystem mechanics, runtime flow, ownership, and boundaries as a detailed styled standalone HTML page grounded in repository evidence. Use for architecture walkthroughs, onboarding, or how-does-this-work requests.","path":"skills/how/SKILL.md"},{"name":"interrogate","description":"Review a fixed diff, branch, design, or artifact using independent reviewers, then triage findings with evidence and reasons. Use for adversarial review or an explicit interrogate request.","path":"skills/interrogate/SKILL.md"},{"name":"recall","description":"Reconstruct recent work on a topic from scoped conversation history, project artifacts, and live records, then produce a concise current-state brief. Use for catch-me-up, resume-context, or where-did-I-leave-off requests.","path":"skills/recall/SKILL.md"},{"name":"swarm","description":"Distribute independent task slices or declared race arms across workers and aggregate one evidence-backed report. Use for parallel coverage, exploration, or an explicit swarm request.","path":"skills/swarm/SKILL.md"}],"config":{"version":1,"concurrency":3,"evidence_retry_limit":1,"roles":{"candidate":{"model":null,"reasoning_effort":null},"worker":{"model":null,"reasoning_effort":null},"reviewer":{"model":null,"reasoning_effort":null},"judge":{"model":null,"reasoning_effort":null},"synthesizer":{"model":null,"reasoning_effort":null},"explorer":{"model":null,"reasoning_effort":null},"explainer":{"model":null,"reasoning_effort":null}},"defaults":{"arena":{"candidates":3},"swarm":{"mode":"coverage"},"interrogate":{"reviewers":3},"architect":{"candidates":3},"how":{"explorers":3}}},"source_sha256":"b7a1c049059ed96ab352d880c0373437fbf6db564f3423e0f3c0c63cb4b61c65","built_at":"2026-10-03T08:09:20+00:00"}</script>
+<script id="orch-bundle" type="application/json">{"version":1,"skills":[{"name":"architect","description":"Settle caller-facing interfaces, data shapes, ownership, and module boundaries through competing design sketches before consequential implementation. Use for architecture requests or changes whose shape needs deliberate design.","path":"skills/architect/SKILL.md"},{"name":"arena","description":"Generate independent candidates for the same design, code, or writing task, compare them against a rubric, and synthesize one artifact. Use for competing proposals or an explicit arena request.","path":"skills/arena/SKILL.md"},{"name":"how","description":"Explain subsystem mechanics, runtime flow, ownership, and boundaries as a detailed styled standalone HTML page grounded in repository evidence. Use for architecture walkthroughs, onboarding, or how-does-this-work requests.","path":"skills/how/SKILL.md"},{"name":"interrogate","description":"Review a fixed diff, branch, design, or artifact using independent reviewers, then triage findings with evidence and reasons. Use for adversarial review or an explicit interrogate request.","path":"skills/interrogate/SKILL.md"},{"name":"recall","description":"Reconstruct recent work on a topic from scoped conversation history, project artifacts, and live records, then produce a concise current-state brief. Use for catch-me-up, resume-context, or where-did-I-leave-off requests.","path":"skills/recall/SKILL.md"},{"name":"swarm","description":"Distribute independent task slices or declared race arms across workers and aggregate one evidence-backed report. Use for parallel coverage, exploration, or an explicit swarm request.","path":"skills/swarm/SKILL.md"}],"config":{"version":1,"concurrency":3,"evidence_retry_limit":1,"roles":{"candidate":{"model":null,"reasoning_effort":null},"worker":{"model":null,"reasoning_effort":null},"reviewer":{"model":null,"reasoning_effort":null},"judge":{"model":null,"reasoning_effort":null},"synthesizer":{"model":null,"reasoning_effort":null},"explorer":{"model":null,"reasoning_effort":null},"explainer":{"model":null,"reasoning_effort":null}},"defaults":{"arena":{"candidates":3},"swarm":{"mode":"coverage"},"interrogate":{"reviewers":3},"architect":{"candidates":3},"how":{"explorers":3}}},"source_sha256":"051e3e681228a26b27e4513d3aae47c81a77a6eba7406303fb03b220f1a9c417","built_at":"2026-10-03T08:22:18+00:00"}</script>
 <script>
 "use strict";
 (() => {
@@ -257,34 +257,97 @@ function restoreFocus(state, root = document) {
 
 const sheets = [];
 
+// ---- Pointer gate and focus return -------------------------------------------------------
+
+// A text field commits on blur, which happens at pointerdown on the next control. Repainting then
+// would remove that control before its click, so repaints wait for the pointer to come up.
+let pointerDown = false;
+const deferred = new Map();
+
+function whenIdle(key, fn) {
+  if (pointerDown) deferred.set(key, fn); else fn();
+}
+
+function flushDeferred() {
+  const fns = [...deferred.values()];
+  deferred.clear();
+  for (const fn of fns) fn();
+}
+
+if (typeof document !== "undefined") {
+  document.addEventListener("pointerdown", () => { pointerDown = true; }, true);
+  for (const ev of ["pointerup", "pointercancel"]) document.addEventListener(ev, () => { pointerDown = false; setTimeout(flushDeferred, 0); }, true);
+}
+
+// Openers are rebuilt by re-renders, so remember how to find the same control again.
+function describeFocus(el) {
+  if (!el || el === document.body || !el.tagName) return null;
+  const d = { tag: el.tagName, key: el.dataset?.key ?? null, text: (el.textContent || "").trim().slice(0, 60), label: el.getAttribute("aria-label") };
+  d.nth = findMatches(d).indexOf(el);
+  return d;
+}
+
+function findMatches(d) {
+  return [...document.querySelectorAll(d.tag)].filter(e => !e.closest("dialog:not([open])") &&
+    (d.key ? e.dataset?.key === d.key : (e.textContent || "").trim().slice(0, 60) === d.text && e.getAttribute("aria-label") === d.label));
+}
+
+function returnFocus(opener, description) {
+  if (opener && document.contains(opener)) { opener.focus({ preventScroll: true }); return; }
+  setTimeout(() => {
+    const matches = description ? findMatches(description) : [];
+    const target = matches[Math.max(0, Math.min(description?.nth ?? 0, matches.length - 1))] ?? document.getElementById("main");
+    target?.focus({ preventScroll: true });
+  }, 0);
+}
+
+// <details> that stays open across re-renders.
+const openDetails = new Set();
+function details(key, attrs, summary, ...children) {
+  return h("details", { ...attrs, "data-open-key": key, open: openDetails.has(key), ontoggle: e => { e.target.open ? openDetails.add(key) : openDetails.delete(key); } },
+    h("summary", {}, summary), ...children);
+}
+
 // openSheet(title, render) where render() returns the body content from current state. The sheet
 // re-renders on refreshSheets(); closing returns focus to the opener. A sheet whose entity
 // disappeared can return null from render() to close itself.
 function openSheet(title, render, { wide = false, onClose } = {}) {
   const opener = document.activeElement;
+  const openerDescription = describeFocus(opener);
   const titleId = "sheet-title-" + (sheets.length + Math.random().toString(36).slice(2, 6));
   const body = h("div", { class: "sheet-body" });
   const dialog = h("dialog", { class: "sheet" + (wide ? " wide" : ""), "aria-labelledby": titleId },
-    h("header", { class: "sheet-head" }, h("h2", { id: titleId }, title), h("button", { class: "quiet", type: "button", "data-close": "", onclick: () => dialog.close() }, "Done")),
+    h("header", { class: "sheet-head" }, h("h2", { id: titleId }, title), h("button", { class: "quiet", type: "button", "data-close": "", onclick: () => closeSheet(sheet) }, "Done")),
     body);
-  const sheet = { dialog, body, render, closed: false };
-  dialog.addEventListener("close", () => {
+  // finish() is idempotent: it runs from the native close event (Escape, backdrop) and directly
+  // from our own close paths, so cleanup never depends on event timing.
+  const sheet = { dialog, body, render, closed: false, finish() {
+    if (sheet.closed) return;
     sheet.closed = true;
-    sheets.splice(sheets.indexOf(sheet), 1);
+    const i = sheets.indexOf(sheet);
+    if (i >= 0) sheets.splice(i, 1);
     dialog.remove();
-    if (opener && document.contains(opener)) opener.focus({ preventScroll: true });
+    returnFocus(opener, openerDescription);
     onClose?.();
-  });
+  } };
+  dialog.addEventListener("close", () => sheet.finish());
+  if (render() === null) return { close() {}, body }; // nothing to show; never open an empty sheet
   document.body.append(dialog);
   sheets.push(sheet);
   paint(sheet);
   dialog.showModal();
-  return { close: () => !sheet.closed && dialog.close(), body };
+  return { close: () => closeSheet(sheet), body };
+}
+
+function closeSheet(sheet) {
+  if (sheet.closed) return;
+  if (sheet.dialog.open) sheet.dialog.close();
+  sheet.finish();
 }
 
 function paint(sheet) {
   const content = sheet.render();
-  if (content === null) { sheet.dialog.close(); return; }
+  if (content === null) { closeSheet(sheet); return; }
   const focus = captureFocus(), scroll = sheet.body.scrollTop;
   sheet.body.replaceChildren();
   append(sheet.body, [content]);
@@ -293,24 +356,34 @@ function paint(sheet) {
 }
 
 function refreshSheets() {
-  for (const s of [...sheets]) if (!s.closed) paint(s);
+  whenIdle("sheets", () => { for (const s of [...sheets]) if (!s.closed) paint(s); });
 }
 
 const hasOpenSheet = () => sheets.length > 0;
-function closeAllSheets() { for (const s of [...sheets]) s.dialog.close(); }
+function closeAllSheets() { for (const s of [...sheets]) closeSheet(s); }
 
 // ---- Confirm -----------------------------------------------------------------------------
 
 function confirmDialog(message, { confirmLabel = "Confirm", cancelLabel = "Cancel", detail = null, danger = false } = {}) {
   return new Promise(resolve => {
     const opener = document.activeElement;
-    let result = false;
+    const openerDescription = describeFocus(opener);
+    let result = false, done = false;
+    // Idempotent for the same reason as sheets: resolve from our buttons and from the native close event.
+    const finish = () => {
+      if (done) return;
+      done = true;
+      if (dialog.open) dialog.close();
+      dialog.remove();
+      returnFocus(opener, openerDescription);
+      resolve(result);
+    };
     const dialog = h("dialog", { class: "confirm", "aria-label": message },
       h("p", { class: "confirm-message" }, message), detail,
       h("div", { class: "button-row" },
-        h("button", { type: "button", onclick: () => dialog.close() }, cancelLabel),
-        h("button", { type: "button", class: danger ? "danger" : "primary", onclick: () => { result = true; dialog.close(); } }, confirmLabel)));
-    dialog.addEventListener("close", () => { dialog.remove(); if (opener && document.contains(opener)) opener.focus({ preventScroll: true }); resolve(result); });
+        h("button", { type: "button", onclick: finish }, cancelLabel),
+        h("button", { type: "button", class: danger ? "danger" : "primary", onclick: () => { result = true; finish(); } }, confirmLabel)));
+    dialog.addEventListener("close", finish);
     document.body.append(dialog);
     dialog.showModal();
   });
@@ -338,7 +411,7 @@ async function copyText(text, textarea = null) {
 }
 
 const plural = (n, one, many = one + "s") => `${n} ${n === 1 ? one : many}`;
-return { $, h, clear, toast, captureFocus, restoreFocus, openSheet, refreshSheets, hasOpenSheet, closeAllSheets, confirmDialog, download, copyText, plural };
+return { $, h, clear, toast, captureFocus, restoreFocus, whenIdle, details, openSheet, refreshSheets, hasOpenSheet, closeAllSheets, confirmDialog, download, copyText, plural };
 })();
 __modules["domain/schema.js"] = (() => {
 // Workspace v2 envelope, shared limits, and primitive validators.
@@ -1337,15 +1410,18 @@ function createStore(initial = null, { idGen = defaultId, clock = () => new Date
 
     "recipe/capture": (ws, { stepIds, name }) => {
       const wf = requireWorkflow(ws);
-      const { fragment, issues } = captureRecipe(wf, stepIds ?? [], name ?? "");
+      const label = (name ?? "").trim() || "Reusable workflow";
+      const { fragment, issues } = captureRecipe(wf, stepIds ?? [], label);
       if (issues.length) throw new CommandError(issues);
       const id = newId(ws);
-      ws.recipes.push({ id, revision: 1, name: name || "Reusable workflow", fragment });
+      ws.recipes.push({ id, revision: 1, name: label, fragment });
       return { id };
     },
     "recipe/rename": (ws, { id, name }) => {
       const r = find(ws.recipes, id, "Recipe");
-      r.name = name; r.fragment.name = name; r.revision += 1;
+      const label = (name ?? "").trim();
+      if (!label) reject("recipe.name", "A reusable workflow needs a name.", id);
+      r.name = label; r.fragment.name = label; r.revision += 1;
     },
     "recipe/remove": (ws, { id }) => {
       find(ws.recipes, id, "Recipe");
@@ -1439,11 +1515,11 @@ function createStore(initial = null, { idGen = defaultId, clock = () => new Date
   }
 
   // Replace the whole document (import, migration accept). Validated, undoable, revision advances.
-  function replace(next) {
+  function replace(next, { minRevision = 0 } = {}) {
     const problems = validateWorkspace(next);
     if (problems.length) return { ok: false, issues: problems };
     const draft = clone(next);
-    draft.revision = current.revision + 1;
+    draft.revision = Math.max(current.revision + 1, minRevision);
     draft.lastWriter = session;
     redoStack.length = 0;
     return commit(draft);
@@ -1483,6 +1559,7 @@ function safe(fn, fallback) {
 
 function createRepository(storage, { session = "local" } = {}) {
   let knownRevision = null;
+  let loadedEmpty = false; // storage held nothing when we loaded; any copy appearing later is another window's
   let blocked = null; // reason string once a conflict or protected draft pauses saving
 
   const read = key => safe(() => storage.getItem(key), undefined);
@@ -1497,9 +1574,9 @@ function createRepository(storage, { session = "local" } = {}) {
     load() {
       const raw = read(KEYS.current);
       if (raw === undefined) return { kind: "unavailable" };
-      if (raw === null) return { kind: "empty" };
+      if (raw === null) { loadedEmpty = true; return { kind: "empty" }; }
       const decoded = decodeWorkspace(raw);
-      if (decoded.ok) { knownRevision = decoded.workspace.revision; return { kind: "ok", workspace: decoded.workspace, raw }; }
+      if (decoded.ok) { knownRevision = decoded.workspace.revision; loadedEmpty = false; return { kind: "ok", workspace: decoded.workspace, raw }; }
       blocked = "protected";
       return { kind: "protected", reason: decoded.kind, raw, issues: decoded.issues };
     },
@@ -1516,25 +1593,37 @@ function createRepository(storage, { session = "local" } = {}) {
     },
 
     // Called after the user explicitly chooses to replace a protected draft or to take over a conflict.
-    release() { blocked = null; knownRevision = storedRevision(); },
+    release() { blocked = null; loadedEmpty = false; knownRevision = storedRevision(); },
 
     save(workspace) {
       if (blocked) return { ok: false, status: blocked === "protected" ? "Original draft protected · export a copy" : "Saving paused · another window changed this workspace", reason: blocked };
       const text = encodeWorkspace(workspace);
       if (utf8Bytes(text) > LIMITS.workspaceBytes) return { ok: false, status: "Too large to save · export JSON to keep your work", reason: "size" };
+      let previous;
+      try { previous = storage.getItem(KEYS.current); }
+      catch { return { ok: false, status: "Browser storage unavailable · export JSON to keep your work", reason: "storage" }; }
+      // Whatever sits in storage now is our own earlier save, another window's work, or data this
+      // editor cannot read. Only the first may be overwritten silently.
+      if (typeof previous === "string" && !decodeWorkspace(previous).ok) {
+        blocked = "protected";
+        return { ok: false, status: "Original draft protected · export a copy", reason: "protected", raw: previous };
+      }
       const stored = storedRevision();
-      if (knownRevision !== null && stored !== null && stored !== knownRevision) {
+      const changed = loadedEmpty ? stored !== null : knownRevision !== null && stored !== null && stored !== knownRevision;
+      if (changed) {
         blocked = "conflict";
         return { ok: false, status: "Saving paused · another window changed this workspace", reason: "conflict" };
       }
+      if (typeof previous === "string") {
+        try { storage.setItem(KEYS.lastGood, previous); } catch { /* last-good is best effort; the real save still proceeds */ }
+      }
       try {
-        const previous = storage.getItem(KEYS.current);
-        if (typeof previous === "string" && decodeWorkspace(previous).ok) storage.setItem(KEYS.lastGood, previous);
         storage.setItem(KEYS.current, text);
         knownRevision = workspace.revision;
+        loadedEmpty = false;
         return { ok: true, status: "Saved on this device" };
       } catch {
-        return { ok: false, status: "Browser storage unavailable · export JSON to keep your work", reason: "storage" };
+        return { ok: false, status: "Browser storage full or unavailable · export JSON to keep your work", reason: "storage" };
       }
     },
 
@@ -1668,7 +1757,7 @@ function compilePrompt(ws, bundle, context = null) {
     const incoming = wf.handoffs.filter(h => h.to === id).map(h => byId.get(h.from));
     lines.push(
       `Step ${i + 1}: ${s.label || p.title}`, `Skill: ${entry.path}`, `Step ID: ${s.id}`,
-      "Inputs: " + (incoming.length ? incoming.map(x => `${x.label} [${x.id}] → ${x.output}`).join("; ") : "Shared goal and available project context"),
+      "Inputs: " + (incoming.length ? incoming.map(x => `${x.label.trim() || presentation(x.skill, catalog).title} [${x.id}] → ${x.output.trim()}`).join("; ") : "Shared goal and available project context"),
       "Output: " + s.output.trim(), "Instructions: " + s.instructions);
     if (p.option) lines.push(`${p.optionLabel}: ${s.options[p.option]}`);
     lines.push("Model: " + (s.model.trim() || "Inherit project role defaults and host"), "Reasoning effort: " + (s.effort || "Inherit project role defaults and host"), "");
@@ -1827,8 +1916,13 @@ function openStepSheet(id) {
 
 function duplicateStep(id) {
   const ws = snap(), s = ws.workflow.steps.find(x => x.id === id);
-  const out = s.output.includes(".") ? s.output.replace(/(\.[^./]+)$/, "-copy$1") : s.output + "-copy";
-  const r = act({ type: "step/add", payload: { step: { skill: s.skill, label: s.label + " copy", instructions: s.instructions, output: out, model: s.model, effort: s.effort, options: s.options } } }, "Step duplicated");
+  // Suffix the final path segment (before its extension) and keep trying until the output is free.
+  const taken = new Set(ws.workflow.steps.map(x => x.output.trim().toLowerCase()));
+  const suffixed = n => s.output.replace(/([^/]*?)(\.[^./]+)?$/, (_, base, ext = "") => `${base}-copy${n > 1 ? "-" + n : ""}${ext}`);
+  let n = 1;
+  while (taken.has(suffixed(n).toLowerCase())) n++;
+  const out = suffixed(n);
+  const r = act({ type: "step/add", payload: { step: { skill: s.skill, label: (s.label + " copy").slice(0, 200), instructions: s.instructions, output: out, model: s.model, effort: s.effort, options: s.options } } }, "Step duplicated");
   if (r.ok) openStepSheet(r.id);
 }
 
@@ -1866,13 +1960,16 @@ function relRow(ws, l, dir) {
 
 // "Add causal relation" form, reused from concept sheets and the Loops view. Its in-progress
 // values live at module level so a re-render (for example after choosing "From") keeps them.
-const causalDraft = { from: "", to: "", sign: "1", delayed: false, label: "" };
+// The Loops-page form and each concept sheet keep separate drafts so they do not disturb each other.
+const causalDrafts = new Map();
 
 function causalForm(ws, fixedFrom = null) {
   const vars = ws.concepts?.variables ?? [];
   if (vars.length < 2) return h("p", { class: "muted" }, "Add at least two concepts to relate them.");
   const ids = vars.map(v => v.id);
-  const d = causalDraft;
+  const draftKey = fixedFrom ?? "*";
+  if (!causalDrafts.has(draftKey)) causalDrafts.set(draftKey, { from: "", to: "", sign: "1", delayed: false, label: "" });
+  const d = causalDrafts.get(draftKey);
   if (fixedFrom) d.from = fixedFrom;
   if (!ids.includes(d.from)) d.from = ids[0];
   if (!ids.includes(d.to) || d.to === d.from) d.to = ids.find(id => id !== d.from);
@@ -1930,7 +2027,7 @@ function pieceStyle(ws, id) {
     return { glyph: p.icon, color: p.color, tint: p.tint, kind: "Skill step" };
   }
   const v = ws.concepts.variables.find(x => x.id === id);
-  return { glyph: (v.label[0] || "?").toUpperCase(), color: v.color, tint: "transparent", kind: "Concept" };
+  return { glyph: ([...v.label][0] || "?").toUpperCase(), color: v.color, tint: "transparent", kind: "Concept" };
 }
 
 function boardSection() {
@@ -1945,6 +2042,7 @@ function boardSection() {
       const style = id ? pieceStyle(ws, id) : null;
       cells.push(h("button", {
         type: "button",
+        "data-key": "cell-" + slot,
         class: "cell" + (id ? " filled" : "") + (id === selected ? " selected" : "") + (dim ? " dim" : "") + (ui.moving && !id ? " target" : ""),
         style: id ? { "--piece": style.color, "--tint": style.tint } : undefined,
         "aria-label": id ? `${slotLabel(slot)}: ${entityLabel(ws, id)}, ${style.kind}` : `${slotLabel(slot)}: empty`,
@@ -1960,7 +2058,7 @@ function boardSection() {
     h("div", { class: "section-head" }, h("h3", { id: "board-title" }, "Board"), h("span", { class: "count" }, `${layout.rows}×${layout.columns}`)),
     h("p", { class: "muted" }, "Where things sit. Position never changes run order, handoffs, or causal links."),
     h("div", { class: "chips", role: "group", "aria-label": "Board filter" }, FILTERS.map(([key, label]) =>
-      h("button", { type: "button", class: "chip", "aria-pressed": String(ui.boardFilter === key), onclick: () => { ui.boardFilter = key; app.rerender(); } }, label))),
+      h("button", { type: "button", class: "chip", "data-key": "chip-" + key, "aria-pressed": String(ui.boardFilter === key), onclick: () => { ui.boardFilter = key; app.rerender(); } }, label))),
     ui.moving ? h("div", { class: "banner" }, `Moving “${entityLabel(ws, ui.moving)}”: tap an empty slot to place it, or an occupied slot to choose a swap.`,
       h("button", { type: "button", onclick: () => { ui.moving = null; app.rerender(); } }, "Cancel")) : null,
     h("div", { class: "board-scroll", tabindex: "-1" }, h("div", { class: "board", style: { "--cols": layout.columns } }, cells)),
@@ -2075,7 +2173,7 @@ __modules["ui/prompt-dialog.js"] = (() => {
 // Agent prompt dialog. Handoffs and run order decide execution; analytical context is optional,
 // chosen explicitly, shown verbatim, capped, and frozen until the person refreshes it.
 
-const { h, openSheet, copyText, download } = __modules["ui/dom.js"];
+const { h, openSheet, copyText, download, details } = __modules["ui/dom.js"];
 const { app, act, snap, entityLabel } = __modules["ui/context.js"];
 const { compilePrompt, slugify } = __modules["prompt/compiler.js"];
 const { contextPreview, isPreviewStale } = __modules["domain/references.js"];
@@ -2100,9 +2198,9 @@ function openPromptDialog() {
         refs.length ? refs.map(r => h("label", { class: "check" },
           h("input", { type: "checkbox", checked: r.includeInPrompt, onchange: e => act({ type: "reference/update", payload: { id: r.id, changes: { includeInPrompt: e.target.checked } } }) }),
           `${entityLabel(ws, r.stepId)} ↔ ${entityLabel(ws, r.variableId)}${r.purpose ? ": " + r.purpose : ""}`)) : h("p", { class: "muted" }, "No relations to include."),
-        ws.notes.length ? h("details", {}, h("summary", {}, `Notes (${ui.contextNotes.size} selected)`),
+        ws.notes.length ? details("prompt-notes", {}, `Notes (${ui.contextNotes.size} selected)`,
           ws.notes.map(n => h("label", { class: "check" },
-            h("input", { type: "checkbox", checked: ui.contextNotes.has(n.id), onchange: e => { e.target.checked ? ui.contextNotes.add(n.id) : ui.contextNotes.delete(n.id); app.refreshSheets(); } }),
+            h("input", { type: "checkbox", "data-key": "note-pick-" + n.id, checked: ui.contextNotes.has(n.id), onchange: e => { e.target.checked ? ui.contextNotes.add(n.id) : ui.contextNotes.delete(n.id); app.refreshSheets(); } }),
             `${n.title || "Untitled"} ${n.authorKind === "agent-proposal" ? "(agent proposal)" : ""}`))) : null,
         stale ? h("div", { class: "banner" }, "Your selection or its content changed since this preview. The prompt below still uses the older context.",
           h("button", { type: "button", onclick: () => { ui.preview = contextPreview(snap(), [...ui.contextNotes]); app.refreshSheets(); } }, "Refresh preview")) : null,
@@ -2148,20 +2246,39 @@ function openLibrary() {
     })));
 }
 
+const prefixDrafts = {};
+
+// First run-N folder no existing output already uses.
+function nextPrefix(ws) {
+  const used = (ws.workflow?.steps ?? []).map(s => s.output.trim().toLowerCase());
+  let n = 1;
+  while (used.some(o => o === `run-${n}` || o.startsWith(`run-${n}/`))) n++;
+  return `run-${n}`;
+}
+
 function openRecipes() {
   openSheet("Reusable workflows", () => {
     const ws = snap(), recipes = ws.recipes;
     return h("div", { class: "stack" },
       h("p", { class: "muted" }, "A reusable workflow is a frozen copy of ordinary steps and their handoffs. Inserting it adds fresh, editable steps; it is not a new skill and later edits never update earlier uses."),
       recipes.length ? recipes.map(r => {
-        let prefix = `run-${recipes.indexOf(r) + 1}`;
+        // A typed prefix survives re-renders; otherwise suggest the first folder not already used.
+        if (!(r.id in prefixDrafts)) prefixDrafts[r.id] = nextPrefix(ws);
+        const prefix = prefixDrafts[r.id];
         return h("article", { class: "card" },
           h("div", { class: "card-head" }, h("strong", {}, r.name), h("span", { class: "badge" }, `${plural(r.fragment.steps.length, "step")}, ${plural(r.fragment.handoffs.length, "handoff")}`)),
           h("p", { class: "muted" }, r.fragment.steps.map(s => s.label || s.skill).join(" → ")),
-          h("label", { class: "field" }, h("span", {}, "Output folder prefix"), h("input", { "data-key": "prefix-" + r.id, value: prefix, onchange: e => { prefix = e.target.value; } }),
-            h("small", { class: "muted" }, "Outputs are namespaced so repeated insertions never collide.")),
+          h("label", { class: "field" }, h("span", {}, "Output folder prefix"), h("input", { "data-key": "prefix-" + r.id, value: prefix, oninput: e => { prefixDrafts[r.id] = e.target.value; } }),
+            h("small", { class: "muted" }, "Copied outputs go under this folder. Use a different one if an insertion reports a conflict.")),
           h("div", { class: "button-row" },
-            h("button", { type: "button", class: "primary", onclick: () => { const res = act({ type: "recipe/insert", payload: { recipeId: r.id, outputPrefix: prefix } }, "Inserted"); if (res.ok) toast("Inserted " + plural(res.stepIds.length, "step") + ". Connect them with “Needs evidence from”."); } }, "Insert into workflow"),
+            h("button", { type: "button", class: "primary", onclick: () => {
+              // Clear the draft first: the repaint that follows a successful insert must suggest a fresh folder.
+              const typed = prefixDrafts[r.id];
+              delete prefixDrafts[r.id];
+              const res = act({ type: "recipe/insert", payload: { recipeId: r.id, outputPrefix: typed } }, "Inserted");
+              if (!res.ok) prefixDrafts[r.id] = typed;
+              else { toast("Inserted " + plural(res.stepIds.length, "step") + ". Connect them with “Needs evidence from”."); }
+            } }, "Insert into workflow"),
             h("button", { type: "button", class: "danger-quiet", onclick: async () => { if (await confirmDialog(`Delete the reusable workflow "${r.name}"? Steps already inserted are not affected.`, { confirmLabel: "Delete", danger: true })) act({ type: "recipe/remove", payload: { id: r.id } }, "Deleted"); } }, "Delete")));
       }) : h("p", { class: "muted" }, "None yet. Choose “Save steps as reusable workflow” in the Skills view."));
   });
@@ -2209,7 +2326,7 @@ function renderSkills() {
     wf.steps.length ? h("ol", { class: "steps", "aria-label": "Steps in run order" }, order.map((id, i) => {
       const s = byId.get(id), p = skillPresentation(s.skill), preds = predecessors(wf, id);
       return h("li", { class: "step-card", style: { "--skill": p.color, "--tint": p.tint } },
-        selecting ? h("label", { class: "check select" }, h("input", { type: "checkbox", checked: selecting.has(id), onchange: e => { e.target.checked ? selecting.add(id) : selecting.delete(id); app.rerender(); } }), h("span", { class: "sr" }, `Select ${s.label}`)) : null,
+        selecting ? h("label", { class: "check select" }, h("input", { type: "checkbox", "data-key": "select-" + id, checked: selecting.has(id), onchange: e => { e.target.checked ? selecting.add(id) : selecting.delete(id); app.rerender(); } }), h("span", { class: "sr" }, `Select ${s.label}`)) : null,
         h("span", { class: "step-no", "aria-hidden": "true" }, i + 1),
         h("div", { class: "step-main" },
           h("div", { class: "card-head" }, h("strong", {}, s.label || p.title), h("span", { class: "tag", style: { background: p.tint, color: p.color } }, p.title)),
@@ -2236,7 +2353,7 @@ __modules["ui/loops-view.js"] = (() => {
 // inspectable list of feedback cycles. Classification (reinforcing/balancing) is a structural
 // observation about declared signs, not a forecast.
 
-const { h, plural } = __modules["ui/dom.js"];
+const { h, plural, details } = __modules["ui/dom.js"];
 const { act, snap, entityLabel, signGlyph } = __modules["ui/context.js"];
 const { openVariableSheet, openLinkSheet, causalForm } = __modules["ui/entities.js"];
 const { analyzeConcepts } = __modules["domain/concepts.js"];
@@ -2290,8 +2407,8 @@ function renderLoops() {
       coverage === "partial" ? h("p", { class: "banner" }, "Analysis is partial: the map is large, so some loops were not listed.") : null,
       cycles.length ? cycles.map(c => {
         const name = c.kind === "reinforcing" ? `R${++rn}` : `B${++bn}`;
-        return h("details", { class: "card cycle" },
-          h("summary", {}, h("strong", {}, name), ` ${c.kind}${c.delayed ? ", with delays" : ""} — ${c.variables.map(label).join(" → ")} → ${label(c.variables[0])}`),
+        return details("cycle-" + c.links.join("+"), { class: "card cycle" },
+          [h("strong", {}, name), ` ${c.kind}${c.delayed ? ", with delays" : ""} — ${c.variables.map(label).join(" → ")} → ${label(c.variables[0])}`],
           h("ol", { class: "plain" }, c.links.map(id => { const l = linkById.get(id); return h("li", {}, h("button", { type: "button", class: "link", onclick: () => openLinkSheet(id) }, `${label(l.from)} ${signGlyph(l)}${l.delayed ? " (delayed)" : ""} → ${label(l.to)}`)); })));
       }) : h("p", { class: "muted" }, "No feedback loops. Add relations that return to an earlier concept to create one.")));
 }
@@ -2422,6 +2539,10 @@ const { validateWorkspace } = __modules["domain/workspace.js"];
 const { migrateLegacy } = __modules["io/migrate-v1.js"];
 const { slotOf, freeSlots } = __modules["domain/grid.js"];
 
+const oneLine = t => String(t ?? "").replace(/\s+/g, " ").trim();
+// Body text must not be able to forge the bundle's file markers.
+const neutralize = t => String(t ?? "").replace(/<\!--/g, "&lt;!--");
+
 const sanitizeName = s => (s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "workspace";
 
 // ---- Notes -----------------------------------------------------------------------------
@@ -2430,16 +2551,16 @@ function entityLabel(ws, note) {
   if (note.scope === "workspace") return "Workspace";
   const list = note.scope === "step" ? ws.workflow?.steps : ws.concepts?.variables;
   const e = list?.find(x => x.id === note.targetId);
-  return `${note.scope === "step" ? "Step" : "Concept"}: ${e?.label || note.targetId}`;
+  return `${note.scope === "step" ? "Step" : "Concept"}: ${oneLine(e?.label || note.targetId)}`;
 }
 
 function noteMarkdown(ws, note) {
-  const head = [`# ${note.title || "Untitled note"}`, "",
+  const head = [`# ${oneLine(note.title) || "Untitled note"}`, "",
     `- ID: ${note.id}`, `- Scope: ${entityLabel(ws, note)}${note.targetId ? ` (${note.targetId})` : ""}`,
-    `- Author: ${note.authorKind}${note.authorLabel ? ` (${note.authorLabel})` : ""}`,
+    `- Author: ${note.authorKind}${note.authorLabel ? ` (${oneLine(note.authorLabel)})` : ""}`,
     `- Revision: ${note.revision}`, `- Created: ${note.createdAt}`, `- Updated: ${note.updatedAt}`,
-    `- Source: ${note.provenance.source}`];
-  return head.join("\n") + "\n\n" + note.body.trimEnd() + "\n";
+    `- Source: ${oneLine(note.provenance.source)}`];
+  return head.join("\n") + "\n\n" + neutralize(note.body).trimEnd() + "\n";
 }
 
 // Deterministic bundle of the chosen notes only (never "all by default"). `ids` selects notes.
@@ -2538,7 +2659,7 @@ __modules["ui/transfer-dialog.js"] = (() => {
 // One dialog owner for every transfer: workspace JSON, notes, legacy per-domain exports and
 // imports, agent suggestions, and saved-draft migration. Nothing is applied without a preview.
 
-const { h, openSheet, copyText, download, confirmDialog, toast, plural } = __modules["ui/dom.js"];
+const { h, openSheet, copyText, download, confirmDialog, toast, plural, details } = __modules["ui/dom.js"];
 const { app, act, snap } = __modules["ui/context.js"];
 const { encodeWorkspace, decodeWorkspace } = __modules["domain/workspace.js"];
 const { notesBundle, exportLegacyWorkflow, exportLegacyConcepts, detectImport, importLegacyDomain, sanitizeName } = __modules["io/transfer.js"];
@@ -2546,8 +2667,7 @@ const { migrateLegacy, LEGACY_KEYS } = __modules["io/migrate-v1.js"];
 
 function exportBlock(title, hint, filename, content, type = "application/json") {
   const area = h("textarea", { class: "mono", readOnly: true, rows: 6, "aria-label": title }, content);
-  return h("details", { class: "export" },
-    h("summary", {}, title),
+  return details("export-" + title, { class: "export" }, title,
     h("p", { class: "muted" }, hint),
     area,
     h("div", { class: "button-row" },
@@ -2570,7 +2690,7 @@ function openTransfer() {
 
       h("section", { class: "section" }, h("div", { class: "section-head" }, h("h3", {}, "Export")),
         exportBlock("Whole workspace (JSON)", "Everything: workflow, concepts, relations, notes, reusable workflows, and board. This is the authoritative round-trip.", `${base}.workspace.json`, encodeWorkspace(ws)),
-        h("details", { class: "export" }, h("summary", {}, "Notes (Markdown)"),
+        details("export-notes", { class: "export" }, "Notes (Markdown)",
           h("p", { class: "muted" }, "Choose which notes to export. Nothing is exported by default."),
           ws.notes.length ? ws.notes.map(n => h("label", { class: "check" }, h("input", { type: "checkbox", checked: local.picks.has(n.id), onchange: e => { e.target.checked ? local.picks.add(n.id) : local.picks.delete(n.id); } }), `${n.title || "Untitled"} (${n.scope})`)) : h("p", { class: "muted" }, "No notes."),
           h("button", { type: "button", onclick: () => {
@@ -2654,7 +2774,8 @@ function openMigration({ firstRun = false } = {}) {
       mig.workspace ? h("button", { type: "button", class: "primary", onclick: () => {
         const w = mig.workspace;
         const keep = snap();
-        const hasWork = (keep.workflow?.steps.length ?? 0) + (keep.concepts?.variables.length ?? 0) > 0;
+        // Anything the person has written counts, not only steps and concepts.
+        const hasWork = (keep.workflow?.steps.length ?? 0) + (keep.concepts?.variables.length ?? 0) + keep.notes.length + keep.recipes.length + keep.references.length + (keep.brief.trim() ? 1 : 0) > 0;
         const apply = () => { const r = app.store.replace({ ...w, id: keep.id, name: keep.name === "Untitled workspace" ? w.name : keep.name }); toast(r.ok ? "Drafts imported" : r.issues[0].message); sheet.close(); };
         if (hasWork) confirmDialog("Replace your current workspace content with the saved drafts? You can undo this.", { confirmLabel: "Replace", danger: true }).then(ok => ok && apply());
         else apply();
@@ -2668,7 +2789,7 @@ __modules["ui/app.js"] = (() => {
 // Bootstrap: loads or creates the workspace, wires the shell (header, tabs, banners), re-renders
 // from store snapshots, autosaves through the repository, and protects unreadable drafts.
 
-const { $, h, clear, toast, confirmDialog, download, captureFocus, restoreFocus, refreshSheets, hasOpenSheet } = __modules["ui/dom.js"];
+const { $, h, clear, toast, confirmDialog, download, captureFocus, restoreFocus, refreshSheets, hasOpenSheet, whenIdle } = __modules["ui/dom.js"];
 const { app, snap, act } = __modules["ui/context.js"];
 const { createStore } = __modules["store/workspace-store.js"];
 const { createRepository } = __modules["io/local-repository.js"];
@@ -2724,9 +2845,14 @@ function renderBanners() {
     host.append(h("div", { class: "banner warn", role: "alert" },
       h("strong", {}, "Another window changed this workspace."), " Saving is paused so nothing is overwritten.",
       h("button", { type: "button", onclick: () => {
-        app.repo.release();
         const l = app.repo.load();
-        if (l.kind === "ok") { app.store.replace(l.workspace); app.conflict = false; toast("Loaded the other window’s version"); render(); }
+        if (l.kind !== "ok") { toast("The other window’s copy can’t be read here. Download yours, or keep yours and overwrite."); return; }
+        app.repo.release();
+        // Never let the stored revision move backwards: the loaded copy's revision is a floor.
+        app.store.replace(l.workspace, { minRevision: l.workspace.revision + 1 });
+        app.conflict = false;
+        toast("Loaded the other window’s version");
+        render();
       } }, "Load their version"),
       h("button", { type: "button", onclick: () => download(`${snap().name || "workspace"}.json`, JSON.stringify(snap(), null, 2)) }, "Download mine"),
       h("button", { type: "button", class: "danger-quiet", onclick: () => { app.repo.release(); app.conflict = false; scheduleSave(); render(); } }, "Keep mine and overwrite")));
@@ -2755,7 +2881,7 @@ function render() {
 function scheduleRender() {
   if (renderQueued) return;
   renderQueued = true;
-  queueMicrotask(render);
+  queueMicrotask(() => whenIdle("main", render));
 }
 
 // ---- Saving ------------------------------------------------------------------------------
@@ -2768,11 +2894,17 @@ function setStatus(text) {
 function scheduleSave() {
   setStatus("Saving…");
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    const r = app.repo.save(snap());
-    setStatus(r.status);
-    if (r.reason === "conflict" && !app.conflict) { app.conflict = true; render(); }
-  }, 250);
+  saveTimer = setTimeout(saveNow, 250);
+}
+
+function saveNow() {
+  clearTimeout(saveTimer);
+  saveTimer = null;
+  const r = app.repo.save(snap());
+  setStatus(r.status);
+  if (r.reason === "conflict" && !app.conflict) { app.conflict = true; render(); }
+  // Stored data turned unreadable (or newer) while this window was open: protect it like a failed load.
+  if (r.reason === "protected" && !app.protectedDraft) { app.protectedDraft = { raw: r.raw, reason: "changed" }; render(); }
 }
 
 // ---- Boot --------------------------------------------------------------------------------
@@ -2812,6 +2944,10 @@ function boot() {
     if (e.key.toLowerCase() === "z") { e.preventDefault(); e.shiftKey ? app.store.redo() : app.store.undo(); }
     else if (e.key.toLowerCase() === "y") { e.preventDefault(); app.store.redo(); }
   });
+  // Do not lose a pending autosave when the tab is hidden or closed.
+  const flush = () => { if (saveTimer && !app.protectedDraft && !app.conflict) saveNow(); };
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(); });
+  window.addEventListener("pagehide", flush);
   window.addEventListener("storage", e => {
     if (e.key === "orch.workspace.v2" && !app.protectedDraft) scheduleSave();
   });

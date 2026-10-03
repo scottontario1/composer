@@ -1,7 +1,7 @@
 // Agent prompt dialog. Handoffs and run order decide execution; analytical context is optional,
 // chosen explicitly, shown verbatim, capped, and frozen until the person refreshes it.
 
-import { h, openSheet, copyText, download } from "./dom.js";
+import { h, openSheet, copyText, download, details } from "./dom.js";
 import { app, act, snap, entityLabel } from "./context.js";
 import { compilePrompt, slugify } from "../prompt/compiler.js";
 import { contextPreview, isPreviewStale } from "../domain/references.js";
@@ -26,9 +26,9 @@ export function openPromptDialog() {
         refs.length ? refs.map(r => h("label", { class: "check" },
           h("input", { type: "checkbox", checked: r.includeInPrompt, onchange: e => act({ type: "reference/update", payload: { id: r.id, changes: { includeInPrompt: e.target.checked } } }) }),
           `${entityLabel(ws, r.stepId)} ↔ ${entityLabel(ws, r.variableId)}${r.purpose ? ": " + r.purpose : ""}`)) : h("p", { class: "muted" }, "No relations to include."),
-        ws.notes.length ? h("details", {}, h("summary", {}, `Notes (${ui.contextNotes.size} selected)`),
+        ws.notes.length ? details("prompt-notes", {}, `Notes (${ui.contextNotes.size} selected)`,
           ws.notes.map(n => h("label", { class: "check" },
-            h("input", { type: "checkbox", checked: ui.contextNotes.has(n.id), onchange: e => { e.target.checked ? ui.contextNotes.add(n.id) : ui.contextNotes.delete(n.id); app.refreshSheets(); } }),
+            h("input", { type: "checkbox", "data-key": "note-pick-" + n.id, checked: ui.contextNotes.has(n.id), onchange: e => { e.target.checked ? ui.contextNotes.add(n.id) : ui.contextNotes.delete(n.id); app.refreshSheets(); } }),
             `${n.title || "Untitled"} ${n.authorKind === "agent-proposal" ? "(agent proposal)" : ""}`))) : null,
         stale ? h("div", { class: "banner" }, "Your selection or its content changed since this preview. The prompt below still uses the older context.",
           h("button", { type: "button", onclick: () => { ui.preview = contextPreview(snap(), [...ui.contextNotes]); app.refreshSheets(); } }, "Refresh preview")) : null,

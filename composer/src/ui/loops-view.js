@@ -2,7 +2,7 @@
 // inspectable list of feedback cycles. Classification (reinforcing/balancing) is a structural
 // observation about declared signs, not a forecast.
 
-import { h, plural } from "./dom.js";
+import { h, plural, details } from "./dom.js";
 import { act, snap, entityLabel, signGlyph } from "./context.js";
 import { openVariableSheet, openLinkSheet, causalForm } from "./entities.js";
 import { analyzeConcepts } from "../domain/concepts.js";
@@ -56,8 +56,8 @@ export function renderLoops() {
       coverage === "partial" ? h("p", { class: "banner" }, "Analysis is partial: the map is large, so some loops were not listed.") : null,
       cycles.length ? cycles.map(c => {
         const name = c.kind === "reinforcing" ? `R${++rn}` : `B${++bn}`;
-        return h("details", { class: "card cycle" },
-          h("summary", {}, h("strong", {}, name), ` ${c.kind}${c.delayed ? ", with delays" : ""} — ${c.variables.map(label).join(" → ")} → ${label(c.variables[0])}`),
+        return details("cycle-" + c.links.join("+"), { class: "card cycle" },
+          [h("strong", {}, name), ` ${c.kind}${c.delayed ? ", with delays" : ""} — ${c.variables.map(label).join(" → ")} → ${label(c.variables[0])}`],
           h("ol", { class: "plain" }, c.links.map(id => { const l = linkById.get(id); return h("li", {}, h("button", { type: "button", class: "link", onclick: () => openLinkSheet(id) }, `${label(l.from)} ${signGlyph(l)}${l.delayed ? " (delayed)" : ""} → ${label(l.to)}`)); })));
       }) : h("p", { class: "muted" }, "No feedback loops. Add relations that return to an earlier concept to create one.")));
 }

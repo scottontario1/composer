@@ -26,20 +26,39 @@ export function openLibrary() {
     })));
 }
 
+const prefixDrafts = {};
+
+// First run-N folder no existing output already uses.
+function nextPrefix(ws) {
+  const used = (ws.workflow?.steps ?? []).map(s => s.output.trim().toLowerCase());
+  let n = 1;
+  while (used.some(o => o === `run-${n}` || o.startsWith(`run-${n}/`))) n++;
+  return `run-${n}`;
+}
+
 export function openRecipes() {
   openSheet("Reusable workflows", () => {
     const ws = snap(), recipes = ws.recipes;
     return h("div", { class: "stack" },
       h("p", { class: "muted" }, "A reusable workflow is a frozen copy of ordinary steps and their handoffs. Inserting it adds fresh, editable steps; it is not a new skill and later edits never update earlier uses."),
       recipes.length ? recipes.map(r => {
-        let prefix = `run-${recipes.indexOf(r) + 1}`;
+        // A typed prefix survives re-renders; otherwise suggest the first folder not already used.
+        if (!(r.id in prefixDrafts)) prefixDrafts[r.id] = nextPrefix(ws);
+        const prefix = prefixDrafts[r.id];
         return h("article", { class: "card" },
           h("div", { class: "card-head" }, h("strong", {}, r.name), h("span", { class: "badge" }, `${plural(r.fragment.steps.length, "step")}, ${plural(r.fragment.handoffs.length, "handoff")}`)),
           h("p", { class: "muted" }, r.fragment.steps.map(s => s.label || s.skill).join(" → ")),
-          h("label", { class: "field" }, h("span", {}, "Output folder prefix"), h("input", { "data-key": "prefix-" + r.id, value: prefix, onchange: e => { prefix = e.target.value; } }),
-            h("small", { class: "muted" }, "Outputs are namespaced so repeated insertions never collide.")),
+          h("label", { class: "field" }, h("span", {}, "Output folder prefix"), h("input", { "data-key": "prefix-" + r.id, value: prefix, oninput: e => { prefixDrafts[r.id] = e.target.value; } }),
+            h("small", { class: "muted" }, "Copied outputs go under this folder. Use a different one if an insertion reports a conflict.")),
           h("div", { class: "button-row" },
-            h("button", { type: "button", class: "primary", onclick: () => { const res = act({ type: "recipe/insert", payload: { recipeId: r.id, outputPrefix: prefix } }, "Inserted"); if (res.ok) toast("Inserted " + plural(res.stepIds.length, "step") + ". Connect them with “Needs evidence from”."); } }, "Insert into workflow"),
+            h("button", { type: "button", class: "primary", onclick: () => {
+              // Clear the draft first: the repaint that follows a successful insert must suggest a fresh folder.
+              const typed = prefixDrafts[r.id];
+              delete prefixDrafts[r.id];
+              const res = act({ type: "recipe/insert", payload: { recipeId: r.id, outputPrefix: typed } }, "Inserted");
+              if (!res.ok) prefixDrafts[r.id] = typed;
+              else { toast("Inserted " + plural(res.stepIds.length, "step") + ". Connect them with “Needs evidence from”."); }
+            } }, "Insert into workflow"),
             h("button", { type: "button", class: "danger-quiet", onclick: async () => { if (await confirmDialog(`Delete the reusable workflow "${r.name}"? Steps already inserted are not affected.`, { confirmLabel: "Delete", danger: true })) act({ type: "recipe/remove", payload: { id: r.id } }, "Deleted"); } }, "Delete")));
       }) : h("p", { class: "muted" }, "None yet. Choose “Save steps as reusable workflow” in the Skills view."));
   });
@@ -87,7 +106,7 @@ export function renderSkills() {
     wf.steps.length ? h("ol", { class: "steps", "aria-label": "Steps in run order" }, order.map((id, i) => {
       const s = byId.get(id), p = skillPresentation(s.skill), preds = predecessors(wf, id);
       return h("li", { class: "step-card", style: { "--skill": p.color, "--tint": p.tint } },
-        selecting ? h("label", { class: "check select" }, h("input", { type: "checkbox", checked: selecting.has(id), onchange: e => { e.target.checked ? selecting.add(id) : selecting.delete(id); app.rerender(); } }), h("span", { class: "sr" }, `Select ${s.label}`)) : null,
+        selecting ? h("label", { class: "check select" }, h("input", { type: "checkbox", "data-key": "select-" + id, checked: selecting.has(id), onchange: e => { e.target.checked ? selecting.add(id) : selecting.delete(id); app.rerender(); } }), h("span", { class: "sr" }, `Select ${s.label}`)) : null,
         h("span", { class: "step-no", "aria-hidden": "true" }, i + 1),
         h("div", { class: "step-main" },
           h("div", { class: "card-head" }, h("strong", {}, s.label || p.title), h("span", { class: "tag", style: { background: p.tint, color: p.color } }, p.title)),
