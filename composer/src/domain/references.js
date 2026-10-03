@@ -42,7 +42,7 @@ export function contextPreview(ws, selectedNoteIds = []) {
     const { cycles, coverage } = analyzeConcepts(ws.concepts);
     const relevant = cycles.filter(c => c.variables.some(id => touched.has(id)));
     for (const c of relevant)
-      lines.push(`- Declared ${c.kind} loop: ${c.variables.map(id => vars.get(id)?.label || id).join(" → ")}${c.delayed ? " (includes delays)" : ""}`);
+      lines.push(`- Declared ${c.kind} loop: ${[...c.variables, c.variables[0]].map(id => vars.get(id)?.label || id).join(" → ")}${c.delayed ? " (includes delays)" : ""}`);
     if (coverage === "partial") lines.push("- Loop analysis is partial; some cycles were not enumerated.");
   }
   const chosen = new Set(selectedNoteIds);

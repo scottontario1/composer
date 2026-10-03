@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Refresh the validated catalog embedded in the standalone skill composer."""
+"""Build the standalone composer: bundle sources and embed the validated skill catalog."""
 import argparse
 from datetime import datetime, timezone
 import hashlib
@@ -9,6 +9,7 @@ import re
 import sys
 import tempfile
 
+from bundle_composer import render_template
 from skills import check, read_config, validate_skill
 
 PACKET = re.compile(r'(<script id="orch-bundle" type="application/json">)(.*?)(</script>)', re.S)
@@ -51,16 +52,16 @@ def main():
     parser.add_argument("--check", action="store_true", help="Inspect snapshot freshness without writing")
     args = parser.parse_args()
     root = args.root.expanduser().resolve()
-    template_path = root / "composer" / "index.html"
-    output = args.output.expanduser().resolve() if args.output else template_path
+    default_output = root / "composer" / "index.html"
+    output = args.output.expanduser().resolve() if args.output else default_output
     temporary = None
     try:
-        template = template_path.read_text(encoding="utf-8")
+        template = render_template(root)
         if len(PACKET.findall(template)) != 1:
             raise ValueError("Composer needs exactly one orch-bundle JSON packet")
         data = canonical_packet(root, template)
         if args.check:
-            text = output.read_text(encoding="utf-8")
+            text = output.read_text(encoding="utf-8").replace("\r\n", "\n")
             matches = list(PACKET.finditer(text))
             if len(matches) != 1:
                 raise ValueError("Output needs exactly one embedded catalog packet")
@@ -82,11 +83,12 @@ def main():
         rendered = PACKET.sub(lambda match: match[1] + payload + match[3], template)
         output.parent.mkdir(parents=True, exist_ok=True)
         with tempfile.NamedTemporaryFile(
-            "w", encoding="utf-8", dir=output.parent, delete=False
+            "w", encoding="utf-8", newline="
+", dir=output.parent, delete=False
         ) as handle:
             temporary = Path(handle.name)
             handle.write(rendered)
-        temporary.chmod(template_path.stat().st_mode & 0o777)
+        temporary.chmod(default_output.stat().st_mode & 0o777 if default_output.exists() else 0o644)
         temporary.replace(output)
         temporary = None
         print(f"Standalone composer: {output} ({len(data['skills'])} validated skills)")

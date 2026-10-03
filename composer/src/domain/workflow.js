@@ -127,8 +127,12 @@ export function readinessIssues(wf, catalog = null) {
       inputs.get(s.id) > 1 ? `${name}: joins ${inputs.get(s.id)} inputs; add instructions for reconciling them.` : `${name}: add instructions.`, s.id));
     const output = s.output.trim();
     if (!safeOutputPath(output)) out.push(issue("ready.output", `${name}: output must be a safe relative path.`, s.id));
-    else if (outputs.has(output)) out.push(issue("ready.output", `${name}: output ${output} is also used by ${outputs.get(output)}.`, s.id));
-    else outputs.set(output, name);
+    else {
+      const key = output.toLowerCase();
+      const clash = [...outputs.keys()].find(o => o === key || o.startsWith(key + "/") || key.startsWith(o + "/"));
+      if (clash) out.push(issue("ready.output", `${name}: output ${output} conflicts with ${outputs.get(clash)}.`, s.id));
+      else outputs.set(key, name);
+    }
     if (s.skill === "how" && !output.endsWith(".html")) out.push(issue("ready.output", `${name}: How output must end in .html.`, s.id));
   }
   return out;

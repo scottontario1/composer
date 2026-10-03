@@ -6,6 +6,7 @@
 import { LIMITS, clone, emptyWorkflow, emptyConcepts, emptyWorkspace, issue } from "../domain/schema.js";
 import { validateWorkspace, entityIds } from "../domain/workspace.js";
 import * as grid from "../domain/grid.js";
+import { captureRecipe, previewInsert } from "../domain/recipes.js";
 
 const STEP_FIELDS = ["skill", "label", "instructions", "output", "model", "effort", "options"];
 const VARIABLE_FIELDS = ["label", "note", "group", "color"];
@@ -206,6 +207,38 @@ export function createStore(initial = null, { idGen = defaultId, clock = () => n
       else ws.layout.linkBends[linkId] = bend;
     },
 
+    "recipe/capture": (ws, { stepIds, name }) => {
+      const wf = requireWorkflow(ws);
+      const { fragment, issues } = captureRecipe(wf, stepIds ?? [], name ?? "");
+      if (issues.length) throw new CommandError(issues);
+      const id = newId(ws);
+      ws.recipes.push({ id, revision: 1, name: name || "Reusable workflow", fragment });
+      return { id };
+    },
+    "recipe/rename": (ws, { id, name }) => {
+      const r = find(ws.recipes, id, "Recipe");
+      r.name = name; r.fragment.name = name; r.revision += 1;
+    },
+    "recipe/remove": (ws, { id }) => {
+      find(ws.recipes, id, "Recipe");
+      ws.recipes = ws.recipes.filter(r => r.id !== id);
+    },
+    // Copies the recipe's leaves into the workflow as ordinary steps with fresh IDs and
+    // namespaced outputs; one atomic command. Later recipe edits never touch these copies.
+    "recipe/insert": (ws, { recipeId, outputPrefix = "" }) => {
+      const wf = requireWorkflow(ws);
+      const recipe = find(ws.recipes, recipeId, "Recipe");
+      const plan = previewInsert(wf, recipe, outputPrefix, () => newId(ws));
+      if (plan.issues.length) throw new CommandError(plan.issues);
+      if (grid.freeSlots(ws.layout).length < plan.steps.length)
+        reject("recipe.noSlots", `The board has ${grid.freeSlots(ws.layout).length} free slots for ${plan.steps.length} steps; expand the board first.`);
+      wf.steps.push(...plan.steps);
+      wf.handoffs.push(...plan.handoffs);
+      wf.readyOrder.push(...plan.readyOrder);
+      for (const s of plan.steps) applyLayout(ws, l => grid.place(l, s.id));
+      return { id: plan.steps[0]?.id, stepIds: plan.steps.map(s => s.id) };
+    },
+
     "note/create": (ws, { scope, targetId = null, title = "", body, authorLabel }) => {
       const id = newId(ws), now = clock();
       ws.notes.push({ id, scope, targetId, title, body, createdAt: now, updatedAt: now, revision: 1, authorKind: "human",
@@ -261,7 +294,7 @@ export function createStore(initial = null, { idGen = defaultId, clock = () => n
     draft.revision = current.revision + 1;
     draft.lastWriter = session;
     redoStack.length = 0;
-    return { ...commit(draft), ...(result && typeof result === "object" && "id" in result ? { id: result.id } : {}) };
+    return { ...commit(draft), ...(result && typeof result === "object" ? result : {}) };
   }
 
   // Undo/redo restore earlier content but always advance the revision, so revision checks
@@ -277,8 +310,20 @@ export function createStore(initial = null, { idGen = defaultId, clock = () => n
     return { ok: true, revision: current.revision };
   }
 
+  // Replace the whole document (import, migration accept). Validated, undoable, revision advances.
+  function replace(next) {
+    const problems = validateWorkspace(next);
+    if (problems.length) return { ok: false, issues: problems };
+    const draft = clone(next);
+    draft.revision = current.revision + 1;
+    draft.lastWriter = session;
+    redoStack.length = 0;
+    return commit(draft);
+  }
+
   return {
     dispatch,
+    replace,
     snapshot: () => current,
     undo: () => travel(undoStack, redoStack),
     redo: () => travel(redoStack, undoStack),

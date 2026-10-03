@@ -1,6 +1,6 @@
 # Visual skill composer
 
-Open [Skill workshop](../composer/index.html) directly in a browser. The complete app is one HTML file: styles, JavaScript, diagrams, skill catalog, and project defaults are embedded. You can copy that file elsewhere and use it offline. No server, installation, or Python runtime is needed to compose workflows.
+Open [Composer](../composer/index.html) (see [its README](../composer/README.md) for the current Overview / Skills / Loops workspace; this guide describes the earlier skill editor) directly in a browser. The complete app is one HTML file: styles, JavaScript, diagrams, skill catalog, and project defaults are embedded. You can copy that file elsewhere and use it offline. No server, installation, or Python runtime is needed to compose workflows.
 
 Use a browser that executes local HTML, rather than a file manager's static preview. File storage, clipboard access, and downloads depend on the browser. The page offers selectable JSON and prompt text when those conveniences are unavailable.
 
