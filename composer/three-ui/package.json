@@ -1,0 +1,7 @@
+{
+  "name": "composer-three-ui",
+  "private": true,
+  "type": "module",
+  "scripts": {"build": "python build.py --root ../.."},
+  "devDependencies": {"esbuild": "0.25.12"}
+}

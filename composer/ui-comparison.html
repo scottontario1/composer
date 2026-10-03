@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Composer UI comparison</title>
+<style>
+:root{color-scheme:dark;font:15px/1.55 Arial,Helvetica,sans-serif;color:#e7dfcc;background:#1c201e}*{box-sizing:border-box}body{margin:0}main{max-width:1360px;margin:auto;padding:28px 26px 36px}h1{font:400 29px Georgia,serif;color:#ebd09a;margin:0 0 10px}p{max-width:83ch;margin:0 0 18px;color:#bbc0b0}a{color:#e4c68d;text-underline-offset:4px}table{border-collapse:collapse;max-width:920px;width:100%;margin-bottom:22px}th,td{text-align:left;border-bottom:1px solid #4b5042;padding:9px 14px 9px 0;font-size:14px}th{color:#eed498;font-weight:500}.controls{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:15px}.choices{display:flex;gap:8px;flex-wrap:wrap}button{font:inherit;padding:9px 15px;background:#252b23;border:1px solid #6b6d52;color:#d5ccb2;border-radius:5px;cursor:pointer}button[aria-pressed=true]{border-color:#d5b570;background:#51462b;color:#ffe9ad}button:focus-visible,a:focus-visible{outline:3px solid #ffe4a4;outline-offset:4px}iframe{width:100%;height:1050px;border:1px solid #596045;border-radius:6px;background:#1c201e;display:block}.note{font-size:12px;color:#939d8b;margin-top:16px}@media(max-width:600px){main{padding:21px 14px}h1{font-size:25px}th,td{font-size:12px;padding-right:8px}.controls{gap:12px}button{font-size:13px;padding:8px 11px}iframe{height:1000px}}
+</style></head>
+<body><main>
+<h1>The native SVG version is the selected UI</h1>
+<p>It combines fine etched ornament and fitted puzzle contours with native controls, crisp mobile icons, and full skill instructions. The earlier Three.js version is preserved so you can compare both directly.</p>
+<table aria-label="Verified implementation comparison"><thead><tr><th>Observed property</th><th>Native SVG · selected</th><th>Preserved Three.js</th></tr></thead><tbody>
+<tr><td>Standalone HTML</td><td>47,881 bytes</td><td>564,595 bytes</td></tr>
+<tr><td>Runtime library / WebGL</td><td>None / none</td><td>Three.js 0.170.0 / one context</td></tr>
+<tr><td>390px mobile composition</td><td>Stacked within Architect</td><td>Local horizontal scrolling</td></tr>
+<tr><td>Controls and complete skill documents</td><td>Verified · all six</td><td>Verified · all six</td></tr>
+</tbody></table>
+<div class="controls"><div class="choices" role="group" aria-label="Preview version"><button type="button" data-version="native" aria-pressed="true">Native SVG · selected</button><button type="button" data-version="three" aria-pressed="false">Preserved Three.js</button></div><a id="open-version" href="native-ui/index.html" target="_blank" rel="noopener">Open native UI at full size</a></div>
+<iframe id="preview" src="native-ui/index.html" title="Selected native SVG component showcase"></iframe>
+<p class="note">The native page is 91.52% smaller. Its finer border/filigree and mobile layout outweigh the Three.js version’s subtler dark material treatment for this flat UI. Both reproduce the reference procedurally; neither is a pixel-exact copy. File size and context counts are verified; local load observations are not a controlled speed or FPS benchmark. <a href="native-ui/arena-report.md">Read the complete arena and comparison record</a>.</p>
+</main><script>
+const versions={native:{path:'native-ui/index.html',title:'Selected native SVG component showcase',link:'Open native UI at full size'},three:{path:'three-ui/index.html',title:'Preserved Three.js component showcase',link:'Open Three.js UI at full size'}};
+document.querySelectorAll('[data-version]').forEach(button=>button.addEventListener('click',()=>{const key=button.dataset.version,version=versions[key];document.querySelectorAll('[data-version]').forEach(item=>item.setAttribute('aria-pressed',String(item===button)));const frame=document.getElementById('preview');frame.src=version.path;frame.title=version.title;const link=document.getElementById('open-version');link.href=version.path;link.textContent=version.link;}));
+</script></body></html>
