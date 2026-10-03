@@ -1,0 +1,7 @@
+# Swarm coverage brief
+
+User asks swarm planner to plan code changes and several designs/directions; skills must slot into puzzle-like grid cells, never float, with notes and investigation of Codex App Server. All delegates: gpt-6-luna, medium. Plan/prototypes/research, not full production rewrite. Prior architect design docs/architecture/composer.md retained except user now explicitly prefers occupied grid slots and optional app-server access investigation.
+
+Completion: three distinct grid directions and a concrete standalone interactive design study; implementable notes/grid/migration contracts and change slices; current official plus installed App Server evidence and honest local feasibility probe; consolidated code-change plan and coverage report. Individual Skills/Loops views remain, unified workspace direction, mobile first, offline composition still works. Notes attach to workspace, skill or concept; agent suggestions remain provenance-bearing separate proposals. No commits/pushes, no real model turns/spending. Sources: composer/index.html, docs/architecture/composer.md, docs/composer.md, scripts/build_composer.py, orchestration.json, relevant local skills.
+
+Required slices: grid-design, notes-contracts, app-server. Each owns only tasks/<slice> under this run and /tmp scratch. Write report.md PASS/ISSUES/BLOCKED with actual evidence, limits, checks and output paths. No nested delegation or shared source changes. Source inspections/protocol feasibility authorized; do not run unrelated tests. Coordinator alone integrates durable docs/prototype.

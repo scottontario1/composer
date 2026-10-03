@@ -1,0 +1,6 @@
+{
+  "handshake": "failed_or_partial",
+  "reason": "read-only Codex state directory blocked SQLite initialization",
+  "stderrCaptured": true,
+  "accountStatusInspected": false
+}

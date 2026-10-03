@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 460" role="img" aria-labelledby="title desc">
+  <title id="title">Orch skill assembly</title>
+  <desc id="desc">Six interlocking blue, teal, and lavender skill tiles seated in a graphite board.</desc>
+  <rect x="31" y="31" width="658" height="398" rx="31" fill="#263946" stroke="#56717c" stroke-width="4"/>
+  <g transform="translate(92 100)">
+    <path d="M0 0h147v33a18 18 0 1 0 36 0V0h147v133h-34a18 18 0 1 0 0 36h34v133H183v-33a18 18 0 1 0-36 0v33H0V169h34a18 18 0 1 0 0-36H0z" fill="#427b88" stroke="#182a35" stroke-width="6"/>
+    <path d="M330 0h147v133h-34a18 18 0 1 0 0 36h34v133H330V169h34a18 18 0 1 0 0-36h-34z" fill="#557f96" stroke="#182a35" stroke-width="6"/>
+    <path d="M477 0h147v133h-34a18 18 0 1 0 0 36h34v133H477V169h34a18 18 0 1 0 0-36h-34z" fill="#717eaa" stroke="#182a35" stroke-width="6"/>
+    <path d="M0 302h147v-33a18 18 0 1 1 36 0v33h147V169h-34a18 18 0 1 1 0-36h34V0H183v33a18 18 0 1 1-36 0V0H0v133h34a18 18 0 1 1 0 36H0z" fill="#3d7180" stroke="#182a35" stroke-width="6" transform="translate(0 302) scale(1 -1) translate(0 -302)"/>
+    <path d="M330 302h147V169h-34a18 18 0 1 1 0-36h34V0H330v133h34a18 18 0 1 1 0 36h-34z" fill="#7986ae" stroke="#182a35" stroke-width="6" transform="translate(0 302) scale(1 -1) translate(0 -302)"/>
+    <path d="M477 302h147V169h-34a18 18 0 1 1 0-36h34V0H477v133h34a18 18 0 1 1 0 36h-34z" fill="#547b85" stroke="#182a35" stroke-width="6" transform="translate(0 302) scale(1 -1) translate(0 -302)"/>
+    <g fill="#b0c7c5"><path d="M18 25h48v5H18zM348 25h48v5h-48zM495 25h48v5h-48z"/><circle cx="91" cy="105" r="4"/><circle cx="421" cy="105" r="4"/><circle cx="568" cy="105" r="4"/></g>
+    <path d="M614 279a9 9 0 1 1 0 18 9 9 0 0 1 0-18" fill="#d29a61"/>
+  </g>
+</svg>

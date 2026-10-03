@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" role="img" aria-labelledby="title desc">
+  <title id="title">Context cloud</title>
+  <desc id="desc">Notes, evidence and ideas gather around a central context core.</desc>
+  <rect width="720" height="400" fill="#F7FAF9"/>
+  <g fill="none" stroke="#287F83" stroke-width="2" opacity=".42">
+    <path d="M121 133 225 90 332 81 450 97 567 137M121 133 155 225 262 284 362 291 480 279 574 224M225 90 262 284M332 81 362 291M450 97 362 291M567 137 574 224"/>
+  </g>
+  <g fill="#55B6B0" opacity=".85"><circle cx="121" cy="133" r="7"/><circle cx="225" cy="90" r="6"/><circle cx="332" cy="81" r="6"/><circle cx="450" cy="97" r="6"/><circle cx="567" cy="137" r="7"/><circle cx="155" cy="225" r="6"/><circle cx="262" cy="284" r="7"/><circle cx="362" cy="291" r="6"/><circle cx="480" cy="279" r="7"/><circle cx="574" cy="224" r="6"/></g>
+  <g fill="#F3F7F7"><ellipse cx="180" cy="70" rx="48" ry="25"/><ellipse cx="280" cy="56" rx="52" ry="28"/><ellipse cx="384" cy="53" rx="46" ry="24"/><ellipse cx="480" cy="72" rx="50" ry="26"/></g>
+  <circle cx="362" cy="183" r="60" fill="#35434D"/><circle cx="362" cy="183" r="47" fill="none" stroke="#55B6B0" stroke-width="3"/><circle cx="362" cy="183" r="29" fill="#F3F7F7"/><circle cx="367" cy="176" r="6" fill="#E59A62"/>
+  <g font-family="system-ui,sans-serif">
+    <g transform="translate(36 126) rotate(-4 83 39)"><rect width="166" height="78" rx="4" fill="#DFE8E7"/><rect x="2" y="-2" width="162" height="74" rx="3" fill="#FBFCFA"/><rect width="6" height="72" fill="#E59A62"/><text x="17" y="23" fill="#73858B" font-size="9" font-weight="700">NOTE</text><text x="17" y="43" fill="#26323B" font-size="14" font-weight="650">Working brief</text><text x="17" y="59" fill="#73858B" font-size="10">why context matters</text></g>
+    <g transform="translate(118 283) rotate(3 83 39)"><rect width="166" height="78" rx="4" fill="#DFE8E7"/><rect x="2" y="-2" width="162" height="74" rx="3" fill="#FBFCFA"/><rect width="6" height="72" fill="#55B6B0"/><text x="17" y="23" fill="#73858B" font-size="9" font-weight="700">SOURCE</text><text x="17" y="43" fill="#26323B" font-size="14" font-weight="650">Evidence</text><text x="17" y="59" fill="#73858B" font-size="10">three sources aligned</text></g>
+    <g transform="translate(434 283) rotate(-3 83 39)"><rect width="166" height="78" rx="4" fill="#DFE8E7"/><rect x="2" y="-2" width="162" height="74" rx="3" fill="#FBFCFA"/><rect width="6" height="72" fill="#B9B2DD"/><text x="17" y="23" fill="#73858B" font-size="9" font-weight="700">QUESTION</text><text x="17" y="43" fill="#26323B" font-size="14" font-weight="650">Open question</text><text x="17" y="59" fill="#73858B" font-size="10">where does it break?</text></g>
+    <g transform="translate(518 126) rotate(4 83 39)"><rect width="166" height="78" rx="4" fill="#DFE8E7"/><rect x="2" y="-2" width="162" height="74" rx="3" fill="#FBFCFA"/><rect width="6" height="72" fill="#287F83"/><text x="17" y="23" fill="#73858B" font-size="9" font-weight="700">IDEA</text><text x="17" y="43" fill="#26323B" font-size="14" font-weight="650">Hypothesis</text><text x="17" y="59" fill="#73858B" font-size="10">signal before volume</text></g>
+  </g>
+</svg>
