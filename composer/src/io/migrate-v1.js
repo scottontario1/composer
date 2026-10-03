@@ -34,8 +34,10 @@ const omit = (obj, keys) => Object.fromEntries(Object.entries(obj).filter(([k]) 
 function decodeWorkflow(g) {
   if (!isPlainObject(g) || g.version !== 1 || !Array.isArray(g.nodes) || !Array.isArray(g.edges) || typeof g.name !== "string" || typeof g.goal !== "string")
     return { error: "Not a version 1 workflow draft." };
-  if (g.nodes.some(n => !isPlainObject(n) || !Number.isFinite(n.x) || !Number.isFinite(n.y)))
-    return { error: "Workflow steps need numeric legacy coordinates." };
+  if (g.nodes.some(n => !isPlainObject(n) || typeof n.id !== "string" || !Number.isFinite(n.x) || !Number.isFinite(n.y)))
+    return { error: "Workflow steps need string IDs and numeric legacy coordinates." };
+  if (g.edges.some(e => !isPlainObject(e) || typeof e.from !== "string" || typeof e.to !== "string"))
+    return { error: "Workflow handoffs need string from/to step IDs." };
   // Same clamping/snapping the v1 editor applied on load, so ties resolve identically.
   const placed = g.nodes.map(n => ({ ...n, x: snap(clamp(n.x, 0, 2112)), y: snap(clamp(n.y, 24, 1608)) }));
   const readyOrder = legacyTopological(placed, g.edges);
@@ -53,8 +55,8 @@ function decodeWorkflow(g) {
 function decodeConcepts(m) {
   if (!isPlainObject(m) || m.version !== 1 || m.type !== "causal-loop-map" || !Array.isArray(m.nodes) || !Array.isArray(m.edges) || typeof m.name !== "string")
     return { error: "Not a version 1 loop map draft." };
-  if (m.nodes.some(n => !isPlainObject(n) || !Number.isFinite(n.x) || !Number.isFinite(n.y)))
-    return { error: "Loop variables need numeric legacy coordinates." };
+  if (m.nodes.some(n => !isPlainObject(n) || typeof n.id !== "string" || !Number.isFinite(n.x) || !Number.isFinite(n.y)))
+    return { error: "Loop variables need string IDs and numeric legacy coordinates." };
   if (m.edges.some(e => !isPlainObject(e)))
     return { error: "Loop links must be objects." };
   const bends = {};
@@ -79,10 +81,14 @@ export function migrateLegacy({ workflowRaw = null, loopRaw = null } = {}, { id,
   for (const [domain, raw, decode] of [["workflow", workflowRaw, decodeWorkflow], ["concepts", loopRaw, decodeConcepts]]) {
     const parsed = parse(raw);
     if (parsed.absent) { domains[domain] = { status: "absent" }; continue; }
-    const decoded = parsed.error ? parsed : decode(parsed.value);
+    let decoded;
+    try { decoded = parsed.error ? parsed : decode(parsed.value); }
+    catch (e) { decoded = { error: "Legacy draft could not be read: " + (e?.message ?? "unknown error") }; }
     if (decoded.error) { domains[domain] = { status: "invalid", raw, issues: [issue(`migrate.${domain}`, decoded.error)] }; continue; }
     // A domain that decodes but fails v2 rules stays "invalid" rather than half-migrated.
-    const problems = (domain === "workflow" ? validateWorkflow : validateConcepts)(decoded[domain]);
+    let problems;
+    try { problems = (domain === "workflow" ? validateWorkflow : validateConcepts)(decoded[domain]); }
+    catch (e) { problems = [issue(`migrate.${domain}`, "Legacy draft failed validation: " + (e?.message ?? "unknown error"))]; }
     if (problems.length) { domains[domain] = { status: "invalid", raw, issues: problems }; continue; }
     ws[domain] = decoded[domain];
     if (decoded.bends) bends = decoded.bends;

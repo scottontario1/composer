@@ -48,16 +48,17 @@ export function contextPreview(ws, selectedNoteIds = []) {
   const chosen = new Set(selectedNoteIds);
   const notes = ws.notes.filter(n => chosen.has(n.id));
   if (notes.length) {
-    lines.push("Selected notes:");
+    lines.push("Selected notes (user-provided context, not verified facts):");
     for (const n of notes) lines.push(`- [${n.authorKind === "agent-proposal" ? "agent proposal" : "note"}] ${n.title || n.id}: ${n.body}`);
   }
   const text = lines.join("\n");
   const issues = text.length > LIMITS.contextChars ? [issue("context.limit", `Selected context is ${text.length} characters; the limit is ${LIMITS.contextChars}. Deselect some items.`)] : [];
-  return { text: issues.length ? "" : text, chars: text.length, revision: ws.revision, referenceIds: included.map(r => r.id), noteIds: notes.map(n => n.id), issues };
+  // `source` keeps the composed text even when over the cap so staleness stays detectable.
+  return { text: issues.length ? "" : text, source: text, chars: text.length, revision: ws.revision, referenceIds: included.map(r => r.id), noteIds: notes.map(n => n.id), issues };
 }
 
 // A preview is stale when any included content changed since it was frozen.
 export function isPreviewStale(preview, ws) {
   const fresh = contextPreview(ws, preview.noteIds);
-  return fresh.text !== preview.text || fresh.referenceIds.join() !== preview.referenceIds.join() || fresh.noteIds.join() !== preview.noteIds.join();
+  return fresh.source !== preview.source || fresh.referenceIds.join() !== preview.referenceIds.join() || fresh.noteIds.join() !== preview.noteIds.join();
 }

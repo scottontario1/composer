@@ -191,3 +191,45 @@ test("commands cannot smuggle coordinates or IDs into entities", () => {
   assert.equal(store.dispatch({ type: "step/update", payload: { id: a, changes: { x: 10 } } }).ok, false);
   assert.equal(store.dispatch({ type: "step/update", payload: { id: a, changes: { id: "other" } } }).ok, false);
 });
+
+test("snapshots are deeply frozen; outside mutation cannot corrupt the store", () => {
+  const { store, ok, step } = setup();
+  const a = step("recall");
+  const snap = store.snapshot();
+  assert.throws(() => snap.workflow.readyOrder.push("ghost"), TypeError);
+  assert.throws(() => { snap.layout.occupants.r05c05 = "ghost"; }, TypeError);
+  ok({ type: "workspace/update", payload: { name: "still works" } });
+  store.undo();
+  assert.throws(() => { store.snapshot().workflow.steps[0].skill = "x"; }, TypeError);
+  assert.equal(store.snapshot().workflow.steps[0].id, a);
+});
+
+test("null disposition returns issues instead of throwing", () => {
+  const { store, step } = setup();
+  const a = step("recall");
+  assert.equal(store.dispatch({ type: "step/remove", payload: { id: a, disposition: null } }).ok, true);
+  assert.equal(store.dispatch({ type: "step/remove", payload: { id: "missing", disposition: null } }).ok, false);
+});
+
+test("note move/delete honor expectedNoteRevision", () => {
+  const { store, ok } = setup();
+  const n = ok({ type: "note/create", payload: { scope: "workspace", body: "x" } }).id;
+  ok({ type: "note/edit", payload: { id: n, body: "y" } });
+  assert.equal(store.dispatch({ type: "note/delete", payload: { id: n, expectedNoteRevision: 1 } }).issues[0].code, "note.conflict");
+  assert.equal(store.dispatch({ type: "note/move", payload: { id: n, scope: "workspace", expectedNoteRevision: 1 } }).issues[0].code, "note.conflict");
+  assert.equal(store.dispatch({ type: "note/delete", payload: { id: n, expectedNoteRevision: 2 } }).ok, true);
+});
+
+test("notes-only preview is labeled; over-cap preview still detects staleness", () => {
+  const { store, ok } = setup();
+  const n = ok({ type: "note/create", payload: { scope: "workspace", title: "t", body: "b" } }).id;
+  assert.match(contextPreview(store.snapshot(), [n]).text, /not verified facts/);
+  const big = ok({ type: "note/create", payload: { scope: "workspace", title: "big", body: "z".repeat(15000) } }).id;
+  const big2 = ok({ type: "note/create", payload: { scope: "workspace", title: "big2", body: "z".repeat(15000) } }).id;
+  const preview = contextPreview(store.snapshot(), [big, big2]);
+  assert.equal(preview.issues[0].code, "context.limit");
+  assert.equal(preview.text, "");
+  assert.equal(isPreviewStale(preview, store.snapshot()), false);
+  ok({ type: "note/edit", payload: { id: big, body: "y".repeat(15000) } });
+  assert.equal(isPreviewStale(preview, store.snapshot()), true);
+});

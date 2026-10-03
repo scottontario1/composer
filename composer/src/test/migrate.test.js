@@ -64,3 +64,18 @@ test("absent drafts yield no workspace and no writes", () => {
   assert.equal(r.workspace, null);
   assert.equal(r.domains.workflow.status, "absent");
 });
+
+test("malformed legacy workflow shapes mark only that domain invalid", () => {
+  const loopRaw = legacyLoop([variable("v1", 0, 0)]);
+  const bad = [
+    JSON.stringify({ version: 1, name: "n", goal: "g", nodes: [], edges: [null] }),
+    legacyWorkflow([{ ...node("a", 0, 0), id: 1 }, { ...node("b", 0, 0), id: 2 }]),
+    legacyWorkflow([node("a", 0, 0)], [{ id: "e", from: 5, to: "a" }]),
+  ];
+  for (const workflowRaw of bad) {
+    const { workspace, domains } = migrateLegacy({ workflowRaw, loopRaw }, { id: "ws" });
+    assert.equal(domains.workflow.status, "invalid");
+    assert.equal(domains.workflow.raw, workflowRaw);
+    assert.equal(workspace.concepts.variables.length, 1);
+  }
+});

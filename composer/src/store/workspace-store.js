@@ -13,6 +13,11 @@ const LINK_FIELDS = ["sign", "delayed", "label"];
 const REFERENCE_FIELDS = ["purpose", "includeInPrompt"];
 const HISTORY_LIMIT = 100;
 
+function deepFreeze(v) {
+  if (v && typeof v === "object" && !Object.isFrozen(v)) { Object.freeze(v); for (const k of Object.keys(v)) deepFreeze(v[k]); }
+  return v;
+}
+
 const defaultId = () => (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2) + Date.now().toString(36)).replaceAll("-", "").slice(0, 12);
 
 class CommandError extends Error {
@@ -27,6 +32,11 @@ function pick(changes, allowed, kind) {
     out[k] = clone(v);
   }
   return out;
+}
+
+function checkNoteRevision(note, expected) {
+  if (expected !== undefined && expected !== note.revision)
+    reject("note.conflict", `Note ${note.id} changed (revision ${note.revision}, expected ${expected}).`, note.id);
 }
 
 const find = (list, id, kind) => list.find(x => x.id === id) ?? reject("command.missing", `${kind} ${id} does not exist.`);
@@ -47,7 +57,8 @@ export function deletionPreview(ws, entityId) {
   return { handoffs, links, references, notes };
 }
 
-function disposeDependents(ws, entityId, disposition = {}, relationKey) {
+function disposeDependents(ws, entityId, disposition, relationKey) {
+  disposition = disposition ?? {};
   const preview = deletionPreview(ws, entityId);
   const missing = [];
   if (preview[relationKey].length && disposition[relationKey] !== "remove") missing.push(`${preview[relationKey].length} ${relationKey}`);
@@ -78,7 +89,7 @@ export function createStore(initial = null, { idGen = defaultId, clock = () => n
     current = emptyWorkspace({ id: idGen(), lastWriter: session });
     current.layout = grid.emptyLayout();
   }
-  Object.freeze(current);
+  deepFreeze(current);
   const undoStack = [], redoStack = [], listeners = new Set();
 
   const handlers = {
@@ -204,19 +215,19 @@ export function createStore(initial = null, { idGen = defaultId, clock = () => n
     "note/edit": (ws, { id, title, body, expectedNoteRevision }) => {
       const n = find(ws.notes, id, "Note");
       if (n.authorKind !== "human") reject("note.proposal", "Agent proposals are read-only; create a human note to adopt one.", id);
-      if (expectedNoteRevision !== undefined && expectedNoteRevision !== n.revision)
-        reject("note.conflict", `Note ${id} changed (revision ${n.revision}, expected ${expectedNoteRevision}).`, id);
+      checkNoteRevision(n, expectedNoteRevision);
       if (title !== undefined) n.title = title;
       if (body !== undefined) n.body = body;
       n.revision += 1;
       n.updatedAt = clock();
     },
-    "note/move": (ws, { id, scope, targetId = null }) => {
+    "note/move": (ws, { id, scope, targetId = null, expectedNoteRevision }) => {
       const n = find(ws.notes, id, "Note");
+      checkNoteRevision(n, expectedNoteRevision);
       n.scope = scope; n.targetId = targetId; n.revision += 1; n.updatedAt = clock();
     },
-    "note/delete": (ws, { id }) => {
-      find(ws.notes, id, "Note");
+    "note/delete": (ws, { id, expectedNoteRevision }) => {
+      checkNoteRevision(find(ws.notes, id, "Note"), expectedNoteRevision);
       ws.notes = ws.notes.filter(n => n.id !== id);
     },
     // Agent suggestions always become new, separate records with run/thread provenance.
@@ -231,7 +242,7 @@ export function createStore(initial = null, { idGen = defaultId, clock = () => n
   function commit(next) {
     undoStack.push(current);
     if (undoStack.length > HISTORY_LIMIT) undoStack.shift();
-    current = Object.freeze(next);
+    current = deepFreeze(next);
     for (const fn of listeners) fn(current);
     return { ok: true, revision: current.revision };
   }
@@ -261,7 +272,7 @@ export function createStore(initial = null, { idGen = defaultId, clock = () => n
     to.push(current);
     target.revision = current.revision + 1;
     target.lastWriter = session;
-    current = Object.freeze(target);
+    current = deepFreeze(target);
     for (const fn of listeners) fn(current);
     return { ok: true, revision: current.revision };
   }
