@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "concurrency": 3,
+  "evidence_retry_limit": 1,
+  "roles": {
+    "candidate": {"model": null, "reasoning_effort": null},
+    "worker": {"model": null, "reasoning_effort": null},
+    "reviewer": {"model": null, "reasoning_effort": null},
+    "judge": {"model": null, "reasoning_effort": null},
+    "synthesizer": {"model": null, "reasoning_effort": null},
+    "explorer": {"model": null, "reasoning_effort": null},
+    "explainer": {"model": null, "reasoning_effort": null}
+  },
+  "defaults": {
+    "arena": {"candidates": 3},
+    "swarm": {"mode": "coverage"},
+    "interrogate": {"reviewers": 3},
+    "architect": {"candidates": 3},
+    "how": {"explorers": 3}
+  }
+}

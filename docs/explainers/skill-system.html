@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>How the project skill system works</title>
+<!-- Direction: technical field guide. Paper #f5f8fc; ink #17334d;
+blue #2555a6; teal #146e70; amber #936019; line #ced9e6.
+System Verdana / Trebuchet typography, contents rail, central process diagram.
+Evidence inspected 2026-10-02; no commit revision established. -->
+<style>
+:root{--paper:#f5f8fc;--ink:#17334d;--blue:#2555a6;--teal:#146e70;--amber:#936019;--line:#ced9e6;--white:#fff;--muted:#455e74;--wash:#eaf0f8;--warning:#fff5de}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.7 Verdana,Geneva,sans-serif}a{color:var(--blue);text-underline-offset:4px}a:hover{text-decoration-thickness:2px}a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--blue);outline-offset:5px}button,summary{cursor:pointer}button{font:inherit}code,pre{font-family:Consolas,"Liberation Mono",monospace}code{font-size:.88em;overflow-wrap:anywhere}pre{padding:20px;background:var(--ink);color:var(--white);font-size:13px;line-height:1.8;border-radius:8px;overflow:auto;max-width:100%;white-space:pre}h1,h2,h3{font-family:"Trebuchet MS",Verdana,sans-serif;line-height:1.14;letter-spacing:-.035em}h1{font-size:clamp(2.7rem,5.4vw,4.7rem);margin:12px 0 24px;max-width:14ch}h2{font-size:clamp(1.9rem,3vw,2.8rem);margin:0 0 24px}h3{font-size:1.3rem;letter-spacing:-.015em;margin:0 0 12px}p{max-width:72ch;margin:0 0 18px}.small{font-size:12px;color:var(--muted)}svg text{font-family:Verdana,sans-serif}svg .mono{font-family:Consolas,monospace}.skip{position:absolute;top:-100px;left:20px;z-index:10;background:var(--white);padding:12px}.skip:focus{top:12px}
+.shell{display:grid;grid-template-columns:245px minmax(0,1fr);max-width:1500px;margin:auto}.rail{padding:42px 28px;border-right:1px solid var(--line);height:100vh;position:sticky;top:0;overflow:auto}.brand{font-family:"Trebuchet MS",sans-serif;font-size:28px;letter-spacing:-1px;font-weight:bold;display:block;margin-bottom:8px}.rail p{font-size:12px}.rail nav{margin:40px 0}.rail nav a{display:block;padding:10px 0;text-decoration:none;font-size:13px}.rail nav a:hover{text-decoration:underline}.rail .local{margin-top:30px;padding-top:20px;border-top:1px solid var(--line)}main{padding:56px clamp(24px,5vw,80px) 80px;min-width:0}.intro{font-size:19px;max-width:61ch}.meta{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted)}.lead-line{border-left:4px solid var(--teal);padding:8px 0 8px 20px;margin:26px 0 0;font-size:14px}.section{padding:54px 0;border-bottom:1px solid var(--line)}.section:last-of-type{border:0}.section-head{display:flex;gap:22px;align-items:baseline}.section-number{font:14px Consolas,monospace;color:var(--teal);min-width:26px}.figure{margin:28px 0;background:var(--white);border:1px solid var(--line);border-radius:12px;padding:22px}.figure svg{display:block;width:100%;height:auto}.figure figcaption{padding-top:18px;font-size:13px;color:var(--muted)}.routes,.split{display:grid;grid-template-columns:1fr 1fr;gap:30px}.routes{margin-top:32px}.route{padding-top:16px;border-top:3px solid var(--teal)}.route.native{border-color:var(--blue)}.route p{font-size:14px}.evidence{font-size:12px;color:var(--muted);margin-top:20px}.evidence code{font-size:12px}.step-controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}.step-controls[hidden]{display:none}.step-controls button{background:var(--white);border:1px solid var(--line);border-radius:7px;padding:10px 14px;font-size:13px;color:var(--ink)}.step-controls button[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:var(--white)}.step-panel{margin:0 0 20px;border-left:3px solid var(--teal);padding:10px 0 10px 24px}.step-panel p{font-size:14px}.walkthrough{background:var(--wash);padding:26px;border-radius:12px}.table-wrap{overflow-x:auto;max-width:100%}table{border-collapse:collapse;width:100%;font-size:13px;text-align:left}caption{text-align:left;font-size:14px;font-weight:bold;margin:0 0 18px}th{background:var(--wash)}th,td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:top}td:first-child{min-width:130px}.permission{padding:26px;border-left:4px solid var(--amber);background:var(--warning);margin:26px 0}.permission h3{color:var(--amber)}.permission pre{background:#45381e}.split ul{padding-left:20px;font-size:14px}.split li{margin-bottom:10px}.file-tree{background:var(--white);border:1px solid var(--line);padding:24px;border-radius:12px;color:var(--ink)}.result{background:#e7f3f1;border-left:4px solid var(--teal);padding:24px;margin:26px 0}.result p{font-size:14px}.status{font-size:12px;font-weight:bold;color:var(--teal)}.status.limited{color:var(--amber)}details{border-bottom:1px solid var(--line);padding:16px 0}summary{font-weight:bold;font-size:14px}details p{font-size:14px;margin:16px 0 8px}.sources li{padding:6px 0;font-size:13px}.sources p{font-size:12px;margin:5px 0;color:var(--muted)}footer{padding-top:32px;color:var(--muted);font-size:12px}
+@media(max-width:1050px){.shell{grid-template-columns:200px minmax(0,1fr)}.rail{padding:30px 22px}main{padding:40px 30px}.routes,.split{grid-template-columns:1fr}}
+@media(max-width:720px){.shell{display:block}.rail{position:static;height:auto;padding:20px 22px;border-right:0;border-bottom:1px solid var(--line)}.brand{font-size:24px}.rail nav{display:flex;flex-wrap:wrap;gap:0 18px;margin:16px 0 0}.rail nav a{padding:6px 0;font-size:12px}.rail .local,.rail p{display:none}main{padding:32px 20px 50px}h1{font-size:2.7rem}.intro{font-size:16px}.section{padding:36px 0}.figure{padding:12px}.figure svg{min-width:610px}.figure-scroll{overflow-x:auto}.section-head{gap:12px}.walkthrough,.permission{padding:18px}.step-panel{padding-left:16px}th,td{padding:12px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media print{body{background:white;font-size:10pt}.shell{display:block}.rail,.step-controls,.skip{display:none}main{padding:0}h1{font-size:32pt}h2{font-size:20pt}.section{padding:22px 0}.step-panel[hidden]{display:block!important}.figure{break-inside:avoid}.figure-scroll{overflow:visible}.figure svg{min-width:0}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#edf1f5!important;color:#17334d!important}.routes,.split{grid-template-columns:1fr 1fr}a{color:inherit}.permission,.result{break-inside:avoid}details>p{display:block}footer{font-size:9pt}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to explanation</a>
+<div class="shell">
+<aside class="rail" aria-label="Page navigation">
+<span class="brand">Skill field guide</span>
+<p>A walkthrough of this project's instructions, management tools, and execution boundaries.</p>
+<nav aria-label="Contents">
+<a href="#invocation">Invocation paths</a><a href="#execution">A request in motion</a><a href="#management">Management commands</a><a href="#permissions">The read-only folder</a><a href="#ownership">Files and ownership</a><a href="#test">This How test</a><a href="#sources">Source evidence</a>
+</nav>
+<div class="local"><strong class="small">Local project</strong><p><code>/home/sd/Code2/orch</code></p><p>Inspected October 2, 2026.<br>Standalone, offline HTML.</p></div>
+</aside>
+<main id="main">
+<header>
+<div class="meta"><span>Project mechanics</span><span>Six canonical skills</span><span>Source-grounded explanation</span></div>
+<h1>From a request to a working skill.</h1>
+<p class="intro">You ask for an outcome. The agent reads the matching skill, follows its workflow, and uses the tools available in this session. The project keeps those instructions, shared defaults, and resulting artifacts in separate places.</p>
+<p class="lead-line">For this workspace, the reliable invocation is <code>Use skills/how/SKILL.md to explain …</code>. The file is readable even though the native discovery directory cannot be changed.</p>
+</header>
+
+<section id="invocation" class="section">
+<div class="section-head"><span class="section-number">01</span><h2>Two ways to reach the instructions</h2></div>
+<p>The same <code>SKILL.md</code> can be selected through a project path or through the host's registered skill list. Both routes lead to the agent reading complete instructions and relevant references.</p>
+<figure class="figure"><div class="figure-scroll">
+<svg viewBox="0 0 820 350" role="img" aria-labelledby="flow-title flow-desc">
+<title id="flow-title">Project routing and native discovery lead to canonical skill instructions</title>
+<desc id="flow-desc">A request can name skills/how/SKILL.md directly or be routed by AGENTS.md. Native invocation uses the registered skill selector and a discovery symlink. Registration cannot currently be written because .agents is read-only. The agent executes the loaded workflow through available tools.</desc>
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#146e70"/></marker></defs>
+<rect x="16" y="22" width="175" height="68" rx="10" fill="#e7f3f1" stroke="#146e70"/><text x="34" y="50" font-size="14" font-weight="bold" fill="#17334d">Your request</text><text x="34" y="73" font-size="12" fill="#455e74">Name the skill or its path</text>
+<path d="M192 55 H241" fill="none" stroke="#146e70" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="245" y="22" width="228" height="68" rx="10" fill="#fff" stroke="#146e70"/><text x="263" y="50" font-size="14" font-weight="bold" fill="#17334d">Project routing / direct path</text><text x="263" y="73" font-size="12" fill="#455e74">AGENTS.md identifies the workflow</text>
+<path d="M474 55 H529" fill="none" stroke="#146e70" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="533" y="22" width="270" height="68" rx="10" fill="#eaf0f8" stroke="#2555a6"/><text x="551" y="50" font-size="14" font-weight="bold" fill="#17334d">Read canonical instructions</text><text x="551" y="73" class="mono" font-size="13" fill="#2555a6">skills/how/SKILL.md</text>
+<rect x="16" y="139" width="175" height="68" rx="10" fill="#eaf0f8" stroke="#2555a6"/><text x="34" y="167" font-size="14" font-weight="bold" fill="#17334d">Native selector</text><text x="34" y="190" class="mono" font-size="13" fill="#455e74">$how / skills picker</text>
+<path d="M192 174 H241" fill="none" stroke="#146e70" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="245" y="139" width="228" height="68" rx="10" fill="#fff5de" stroke="#936019"/><text x="263" y="167" font-size="14" font-weight="bold" fill="#17334d">Discovery directory</text><text x="263" y="190" class="mono" font-size="12" fill="#936019">.agents/skills/how → source</text>
+<path d="M474 174 H510 V106 H668 V94" fill="none" stroke="#146e70" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="248" y="234" font-size="12" fill="#936019">Cannot write this registration in the current session</text>
+<path d="M775 90 V260" fill="none" stroke="#146e70" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="245" y="266" width="558" height="66" rx="10" fill="#e7f3f1" stroke="#146e70"/><text x="263" y="294" font-size="14" font-weight="bold" fill="#17334d">Agent executes the workflow using available host tools</text><text x="263" y="317" font-size="12" fill="#455e74">Read evidence · explore · synthesize · check · deliver</text>
+</svg></div><figcaption>Registration exposes a name to the host's selector. Project routing exposes a readable instruction path. The canonical files remain the maintained source.</figcaption></figure>
+<div class="routes">
+<article class="route"><h3>Available now: project instructions</h3><p><code>AGENTS.md</code> names the six skills and their use cases. A direct request identifies the exact file. The agent loads its body and follows the workflow, subject to your request and the session's permissions.</p><pre>Use skills/how/SKILL.md to explain
+how this project's skills are invoked.</pre><p class="evidence">Local evidence: <code>AGENTS.md:3</code>, <code>AGENTS.md:11</code>, <code>docs/skills.md:25</code>.</p></article>
+<article class="route native"><h3>When registered: native discovery</h3><p>Codex supports explicit skill mentions through <code>$</code> or its selector and implicit matching through descriptions. Repository discovery scans <code>.agents/skills</code> and supports symlinked skill directories. Registration here has not been completed.</p><pre>$how Explain our cancellation lifecycle.</pre><p class="evidence"><a href="https://learn.chatgpt.com/docs/build-skills">Official skill documentation</a>. Our canonical <code>skills/</code> directory is not evidence of native picker registration.</p></article>
+</div>
+</section>
+
+<section id="execution" class="section">
+<div class="section-head"><span class="section-number">02</span><h2>A How request in motion</h2></div>
+<p>A narrow question can be handled by one agent. A broad subsystem uses read-only exploration followed by one synthesis stage.</p>
+<div class="walkthrough">
+<div class="step-controls" id="step-controls" hidden aria-label="Explore the execution sequence">
+<button type="button" data-step="0" aria-pressed="true" aria-controls="step-0">1. Select</button><button type="button" data-step="1" aria-pressed="false" aria-controls="step-1">2. Ground</button><button type="button" data-step="2" aria-pressed="false" aria-controls="step-2">3. Explore</button><button type="button" data-step="3" aria-pressed="false" aria-controls="step-3">4. Synthesize</button><button type="button" data-step="4" aria-pressed="false" aria-controls="step-4">5. Deliver</button>
+</div>
+<article class="step-panel" id="step-0"><h3>1. Select and read the workflow</h3><p>The agent reads <code>skills/how/SKILL.md</code> and its HTML page guide. The required output is an actual HTML file with explanatory depth, deliberate styling, diagrams, and source evidence.</p><p class="small">Source: <code>skills/how/SKILL.md:8</code>.</p></article>
+<article class="step-panel" id="step-1"><h3>2. Ground it in the repository</h3><p>The agent identifies the reader and topic, then traces entrypoints, callers, types, state, configuration, and lifecycle. It reconciles claims with code. Historical intent is attributed or left uncertain when the code cannot establish it.</p><p class="small">Sources: <code>skills/how/SKILL.md:12</code> and <code>:16</code>.</p></article>
+<article class="step-panel" id="step-2"><h3>3. Explore meaningful slices</h3><p>For broad topics, the coordinator reads the shared contract, allocates a run directory, and separately starts host agents. Each explorer receives a standalone brief and writes to its own task directory. Configuration requests three explorers; host limits can reduce the panel.</p><pre>python scripts/skills.py new-run how \
+  --label skill-system-explainer</pre><p class="small">Sources: <code>skills/how/SKILL.md:14</code>, <code>scripts/skills.py:175</code>. Allocation creates files; delegation is performed through host tools.</p></article>
+<article class="step-panel" id="step-3"><h3>4. Reconcile and author the page</h3><p>The coordinator reads explorer reports, checks evidence, resolves contradictions, and produces one explanation. Null model settings inherit the current runtime. Inline CSS and SVG preserve core content offline and without JavaScript.</p><p class="small">Sources: <code>skills/how/SKILL.md:16</code>, <code>:24</code>, <code>orchestration.json:11</code>.</p></article>
+<article class="step-panel" id="step-4"><h3>5. Inspect and deliver the artifact</h3><p>The agent checks the explanation against sources and inspects rendering when browser tools work. It saves under <code>docs/explainers/</code>, records evidence and limits, and returns a clickable file link.</p><p class="small">Sources: <code>skills/how/SKILL.md:20</code>, <code>:28</code>.</p></article>
+</div>
+<p class="evidence">Buttons focus the view on each stage. With JavaScript disabled, every stage remains visible. Print styles reveal the complete sequence.</p>
+</section>
+
+<section id="management" class="section">
+<div class="section-head"><span class="section-number">03</span><h2>What the management tool does</h2></div>
+<p><code>scripts/skills.py</code> is a standard-library Python CLI. Its entrypoint parses a command, resolves the project root, and dispatches file operations. The agent performs LLM work separately through the host's tools.</p>
+<div class="table-wrap"><table><caption>Commands, inputs, and observable outputs</caption><thead><tr><th scope="col">Command</th><th scope="col">Data flow</th><th scope="col">What changes</th></tr></thead><tbody>
+<tr><td><code>list</code></td><td>Enumerates non-underscore directories; validates each skill; prints name and description.</td><td>Reads catalog only. <code>catalog():53</code>; dispatch at line 210.</td></tr>
+<tr><td><code>check [skill]</code></td><td>Reads configuration, validates a selected skill or the catalog, and collects errors.</td><td>Reads only. <code>check():111</code>.</td></tr>
+<tr><td><code>add &lt;name&gt;</code></td><td>Reads instructions, generates frontmatter, validates names/references, and refuses existing paths.</td><td>Creates <code>skills/&lt;name&gt;/SKILL.md</code>. <code>add():130</code>.</td></tr>
+<tr><td><code>install</code></td><td>Checks catalog, preflights collisions, preserves matching links, and creates remaining registration links.</td><td>Writes discovery links; dry-run prints a plan. <code>install():149</code>.</td></tr>
+<tr><td><code>new-run &lt;skill&gt;</code></td><td>Checks skill/settings; constructs a timestamp, label, and random ID; snapshots configuration.</td><td>Creates a directory and initial manifest. <code>new_run():175</code>.</td></tr>
+</tbody></table></div>
+<div class="split" style="margin-top:28px"><div><h3>Folders form the catalog</h3><p>Directories containing <code>SKILL.md</code> are the maintained skills. <code>_shared</code> is excluded from enumeration. Adding a skill does not automatically update routing: the maintainer also updates <code>AGENTS.md</code> and the management guide.</p></div><div><h3>Defaults are agent guidance</h3><p>Configuration sets concurrency to three and one evidence follow-up. All seven roles currently have null model and effort values. The host determines supported models and capacity; the Python checker validates format rather than entitlement.</p></div></div>
+<pre>{
+  "concurrency": 3,
+  "evidence_retry_limit": 1,
+  "roles": {
+    "explorer": {"model": null, "reasoning_effort": null},
+    "explainer": {"model": null, "reasoning_effort": null}
+  }
+}</pre><p class="small">Excerpt only. Complete configuration includes five additional roles and workflow defaults.</p>
+<p class="evidence">Sources: <code>scripts/skills.py:23</code>, <code>:76</code>, <code>docs/skills.md:55</code>.</p>
+</section>
+
+<section id="permissions" class="section">
+<div class="section-head"><span class="section-number">04</span><h2>Why .agents is read-only here</h2></div>
+<p>This process sees <code>.agents</code> as a separate read-only memory filesystem mounted by the session environment. Its mode is <code>555</code>, and the supplied filesystem policy grants read access. The ordinary <code>skills/</code> directory remains writable.</p>
+<div class="permission"><h3>Observed mount boundary</h3><pre>findmnt -T /home/sd/Code2/orch/.agents
+
+TARGET                       FSTYPE  OPTIONS
+/home/sd/Code2/orch/.agents    tmpfs   ro,nosuid,nodev,relatime,
+                                    mode=555,uid=1002,gid=1002</pre><p><code>ro</code> is the mount-level restriction. Mode <code>555</code> permits reading and directory traversal without writing. Reading instructions works; creating <code>.agents/skills</code> and symlinks needs write access.</p></div>
+<div class="split"><div><h3>What this establishes</h3><ul><li>Native registration cannot be written to the default target in this session.</li><li>A chmod cannot make a read-only mount writable.</li><li>Direct loading of <code>skills/how/SKILL.md</code> remains available.</li><li>The restriction is environmental, not a requirement of the skill format.</li></ul></div><div><h3>What remains unknown</h3><ul><li>The host administrator's precise reason for this policy.</li><li>The unsandboxed contents underneath the mount.</li><li>Which outside session settings could alter the mount.</li></ul><p class="small">No chmod, remount, installation, or policy changes were attempted.</p></div></div>
+<p>In an environment with a writable intended discovery directory, <code>python scripts/skills.py install</code> can register links. Here, use project routing or explicit paths. Another target helps only when it is both permitted and scanned by the host.</p>
+<p class="evidence">Observed <code>stat -c '%A %a %U:%G %n' .agents .codex .git</code>: mode <code>555</code>. Observed <code>findmnt -T …/.agents</code>: <code>tmpfs</code>, <code>ro</code>. The supplied session policy explicitly marks these directories read-only.</p>
+</section>
+
+<section id="ownership" class="section">
+<div class="section-head"><span class="section-number">05</span><h2>Files, ownership, and failure paths</h2></div>
+<pre class="file-tree">orch/
+├── AGENTS.md                    project routing
+├── orchestration.json           roles and workflow defaults
+├── scripts/skills.py             catalog and run-file management
+├── skills/
+│   ├── arena/SKILL.md
+│   ├── swarm/SKILL.md
+│   ├── interrogate/SKILL.md
+│   ├── architect/SKILL.md
+│   ├── how/SKILL.md
+│   ├── recall/SKILL.md
+│   └── _shared/orchestration.md  shared conventions
+├── docs/explainers/              HTML explanations
+└── .orch/runs/&lt;id&gt;/             local evidence; ignored by Git
+    ├── run.json                  coordinator-owned state
+    ├── brief.md                  goal and acceptance
+    ├── tasks/&lt;task-id&gt;/          explorer-owned reports
+    └── report.md                 coordinator-owned synthesis</pre>
+<p>The coordinator alone owns the manifest and final report. Each explorer writes its task directory. Allocation snapshots defaults, sets <code>planned</code> state, and starts with no tasks. Later task records and state transitions are coordinator work.</p>
+<details open><summary>Invalid input and collisions</summary><p>The checker requires the local two-field frontmatter convention, matching names, nonempty instructions, and existing local Markdown targets. Installation preflights collisions and refuses foreign targets. Missing files, invalid settings, and permission failures return a failing command status.</p></details>
+<details open><summary>Partial writes and incomplete work</summary><p>Registration has no rollback if a later link fails. Allocation also has no rollback if writing the manifest fails after directory creation. The shared contract requires incomplete worker coverage and evidence to remain visible, with one evidence follow-up by default.</p></details>
+<details open><summary>Validation limits</summary><p>Format checks cannot establish provider availability, host discovery, explanation accuracy, visual quality, or execution permissions. Operational evaluation means using a skill on an actual request and examining the produced artifact and evidence.</p></details>
+<p class="evidence">Sources: <code>scripts/skills.py:169</code>, <code>:183</code>, <code>skills/_shared/orchestration.md</code>, <code>docs/skills.md:89</code>.</p>
+</section>
+
+<section id="test" class="section">
+<div class="section-head"><span class="section-number">06</span><h2>This page is the How test</h2></div>
+<p>The coordinator loaded How and its HTML guide, allocated a run, used two independent read-only explorers, inspected permissions directly, and synthesized this artifact.</p>
+<div class="result"><h3>Produced artifact</h3><p><code>docs/explainers/skill-system.html</code></p><p>A standalone page with an invocation diagram, interactive execution sequence, command table, ownership map, permission evidence, and source references. Its embedded CSS and JavaScript require no network resources.</p></div>
+<div class="table-wrap"><table><caption>Test evidence and limits</caption><thead><tr><th scope="col">Check</th><th scope="col">Result</th><th scope="col">Evidence / limit</th></tr></thead><tbody>
+<tr><td>Instruction loading</td><td><span class="status">Completed</span></td><td>Read How, its guide, routing, shared contract, and configuration.</td></tr>
+<tr><td>Exploration</td><td><span class="status">Completed with adjustment</span></td><td>Invocation and management reports returned. A third new agent thread was refused; the coordinator covered permissions.</td></tr>
+<tr><td>Mount inspection</td><td><span class="status">Completed</span></td><td>Read-only tmpfs and mode 555 observed directly.</td></tr>
+<tr><td>Artifact checks</td><td><span class="status" id="artifact-check-status">Static checks passed</span></td><td>HTML structure, internal targets, offline resources, source pointers, and script syntax checked after writing.</td></tr>
+<tr><td>Browser rendering</td><td><span class="status limited">Unavailable</span></td><td>Chrome and bundled Chromium failed on restricted socket operations. Desktop/mobile appearance and browser interaction remain unverified.</td></tr>
+<tr><td>Native discovery</td><td><span class="status limited">Not exercised</span></td><td>Default discovery target is read-only. This test loaded the canonical file directly.</td></tr>
+</tbody></table></div>
+<p class="evidence">Run: <code>20261002T224724Z-skill-system-explainer-14bed6a7</code>. Reports are under <code>.orch/runs/</code>. Role settings inherit; actual model identity was not reported by the host.</p>
+</section>
+
+<section id="sources" class="section">
+<div class="section-head"><span class="section-number">07</span><h2>Source evidence</h2></div>
+<p>Local paths are relative to <code>/home/sd/Code2/orch</code>. Line numbers refer to inspected files. No commit revision was established. Copy paths into your editor; a browser cannot reliably open source at editor line numbers.</p>
+<ol class="sources">
+<li><code>AGENTS.md:3</code><p>Canonical locations and project routing.</p></li>
+<li><code>skills/how/SKILL.md:8</code><p>Required HTML, investigation, synthesis, and delivery.</p></li>
+<li><code>skills/how/references/html-page.md</code><p>Content structure, embedded diagrams, responsive design, and evidence.</p></li>
+<li><code>scripts/skills.py:53,76,111,130,149,175,190</code><p>Catalog, settings, checks, creation, registration, allocation, and dispatch.</p></li>
+<li><code>orchestration.json:3</code><p>Concurrency, evidence follow-up, inherited roles, and workflow defaults.</p></li>
+<li><code>skills/_shared/orchestration.md</code><p>Host bindings, isolation, report contracts, and ownership.</p></li>
+<li><code>docs/skills.md:18,42,69,89</code><p>Invocation, adding skills, registration, and validation limits.</p></li>
+<li><a href="https://learn.chatgpt.com/docs/build-skills">Official OpenAI skill documentation</a><p>Native invocation, repository discovery, and symlink support; consulted October 2, 2026.</p></li>
+<li><code>findmnt -T /home/sd/Code2/orch/.agents</code>, <code>stat -c …</code><p>Observed mount restriction; administrator motive remains unknown.</p></li>
+</ol>
+</section>
+<footer>Generated by the project How workflow. This page explains inspected mechanics and their limits; it performs no installation or external actions.</footer>
+</main>
+</div>
+<script>
+(() => {
+  const controls = document.getElementById('step-controls');
+  const buttons = [...controls.querySelectorAll('button[data-step]')];
+  const panels = buttons.map(button => document.getElementById(button.getAttribute('aria-controls')));
+  function selectStep(index) {
+    buttons.forEach((button, position) => button.setAttribute('aria-pressed', String(position === index)));
+    panels.forEach((panel, position) => { panel.hidden = position !== index; });
+  }
+  buttons.forEach((button, index) => button.addEventListener('click', () => selectStep(index)));
+  selectStep(0);
+  controls.hidden = false;
+})();
+</script>
+</body>
+</html>
+
