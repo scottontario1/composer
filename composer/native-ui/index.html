@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Composer · Enamel skill composition</title>
 <style>
-:root{color-scheme:dark;font-family:Arial,Helvetica,sans-serif;color:#e7dfcb;background:#1c1e1d}*{box-sizing:border-box}body{margin:0;min-width:320px;background:radial-gradient(circle,#5b5f5580 .9px,transparent 1.2px) 10px 10px/28px 28px,#1c1e1d}button,input{font:inherit}a{color:#e4c78c}main{max-width:1190px;margin:auto;padding:28px 28px 48px}.page-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;border-bottom:1px solid #5e574241;padding-bottom:16px}h1{font-size:23px;font-weight:500;letter-spacing:-.5px;margin:0;color:#e4d5b6}.page-head p{font-size:13px;margin:0;color:#aeae9f}.board-host{min-height:650px}.fallback{padding:20px 14px;color:#c9c1af}.fallback strong{color:#efd39b}.fallback ul{display:flex;flex-wrap:wrap;gap:16px;list-style:none;padding:0}.fallback button,.doc-tab{background:#262923;border:1px solid #7b704f;color:#ecd5a4;border-radius:4px;padding:9px 12px;cursor:pointer}.fallback button:focus-visible,.doc-tab:focus-visible{outline:2px solid #f5dba5;outline-offset:3px}.selected-summary{margin:24px 8px 0;padding-top:22px;border-top:1px solid #71613f70}.selected-summary h2{font:400 26px Georgia,serif;color:#ecd4a0;margin:0 0 8px}.selected-summary p{font-size:14px;line-height:1.6;color:#b1b3a6;max-width:76ch;margin:0}.docs{margin-top:22px;padding-top:25px;border-top:1px solid #71613f70}.docs-head{display:flex;gap:24px;justify-content:space-between;align-items:baseline;margin-bottom:20px}.docs h2{font:500 26px Georgia,serif;margin:0;color:#ecd4a0}.docs-head p{font-size:14px;color:#b1b3a6;margin:0}.doc-nav{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 20px}.doc-tab[aria-pressed="true"]{border-color:#e5c77d;background:#463b26;box-shadow:inset 0 0 0 1px #c7a15c33}.doc-tab:hover{background:#3a362b}.doc-sheet{background:#191d1bec;border:1px solid #63583c;border-radius:7px;padding:25px 28px;box-shadow:0 6px 25px #0003}.doc-sheet h3{font:500 24px Georgia,serif;color:#e6cf99;margin:0 0 17px}.doc-body{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:15px/1.7 Arial,Helvetica,sans-serif;color:#d6d3c7;max-width:84ch}.doc-note{color:#b5b8a9;font-size:13px;margin:17px 0 0}.footer{color:#9c9e92;font-size:12px;margin-top:24px}@media(max-width:720px){main{padding:20px 15px 30px}.page-head{display:block}.page-head p{margin-top:8px}.board-host{min-height:unset}.docs-head{display:block}.docs-head p{margin-top:10px}.doc-sheet{padding:20px 16px}.doc-body{font-size:14px}.doc-tab{padding:9px 10px}}
+:root{color-scheme:dark;font-family:Arial,Helvetica,sans-serif;color:#e7dfcb;background:#1c1e1d}*{box-sizing:border-box}body{margin:0;min-width:320px;background:radial-gradient(circle,#5b5f5580 .9px,transparent 1.2px) 10px 10px/28px 28px,#1c1e1d}button,input{font:inherit}a{color:#e4c78c}main{max-width:1190px;margin:auto;padding:28px 28px 48px}.page-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;border-bottom:1px solid #5e574241;padding-bottom:16px}h1{font-size:23px;font-weight:500;letter-spacing:-.5px;margin:0;color:#e4d5b6}.page-head p{font-size:13px;margin:0;color:#aeae9f}.board-host{min-height:650px}.fallback{padding:20px 14px;color:#c9c1af}.fallback strong{color:#efd39b}.fallback ul{display:flex;flex-wrap:wrap;gap:16px;list-style:none;padding:0}.fallback button,.doc-tab{background:#262923;border:1px solid #7b704f;color:#ecd5a4;border-radius:4px;padding:9px 12px;cursor:pointer}.fallback button:focus-visible,.doc-tab:focus-visible{outline:2px solid #f5dba5;outline-offset:3px}.selected-summary{margin:24px 8px 0;padding-top:22px;border-top:1px solid #71613f70}.selected-summary h2{font:400 26px Georgia,serif;color:#ecd4a0;margin:0 0 8px}.selected-summary p{font-size:14px;line-height:1.6;color:#b1b3a6;max-width:76ch;margin:0}.docs{margin-top:22px;padding-top:25px;border-top:1px solid #71613f70}.docs-head{display:flex;gap:24px;justify-content:space-between;align-items:baseline;margin-bottom:20px}.docs h2{font:500 26px Georgia,serif;margin:0;color:#ecd4a0}.docs-head p{font-size:14px;color:#b1b3a6;margin:0}.doc-nav{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 20px}.doc-tab[aria-pressed="true"]{border-color:#e5c77d;background:#463b26;box-shadow:inset 0 0 0 1px #c7a15c33}.doc-tab:hover{background:#3a362b}.doc-sheet{background:#191d1bec;border:1px solid #63583c;border-radius:7px;padding:25px 28px;box-shadow:0 6px 25px #0003}.docs-head a{color:#e4c78c}.docs{scroll-margin-top:12px}.doc-sheet h3{font:500 24px Georgia,serif;color:#e6cf99;margin:0 0 17px}.doc-body{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:15px/1.7 Arial,Helvetica,sans-serif;color:#d6d3c7;max-width:84ch}.doc-note{color:#b5b8a9;font-size:13px;margin:17px 0 0}.footer{color:#9c9e92;font-size:12px;margin-top:24px}@media(max-width:720px){main{padding:20px 15px 30px}.page-head{display:block}.page-head p{margin-top:8px}.board-host{min-height:unset}.docs-head{display:block}.docs-head p{margin-top:10px}.doc-sheet{padding:20px 16px}.doc-body{font-size:14px}.doc-tab{padding:9px 10px}}
 </style>
 </head>
 <body>
@@ -16,7 +16,7 @@
 </div>
 <section class="selected-summary" aria-live="polite"><h2 id="selected-name">Arena</h2><p id="selected-description"></p></section>
 <section class="docs" id="instructions" aria-labelledby="docs-title">
-<div class="docs-head"><h2 id="docs-title">Skill instructions</h2><p>Choose a piece above or a skill below.</p></div>
+<div class="docs-head"><h2 id="docs-title">Skill instructions</h2><p><a href="#board">↑ Back to skills</a></p></div>
 <nav class="doc-nav" aria-label="Skill documentation">
 <button type="button" class="doc-tab" data-document="recall" aria-pressed="false">Recall</button>
 <button type="button" class="doc-tab" data-document="architect" aria-pressed="false">Architect</button>
@@ -47,6 +47,12 @@
     tabs.forEach(tab=>tab.setAttribute('aria-pressed',String(tab.dataset.document===skill)));
   }
   window.showSkillDocument=showDocument;
+  window.revealSkillDocument=function(){
+    const title=document.getElementById('document-title'),box=title.getBoundingClientRect();
+    if(box.top>=0&&box.bottom<=window.innerHeight)return;
+    const calm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.getElementById('instructions').scrollIntoView({behavior:calm?'auto':'smooth',block:'start'});
+  };
   tabs.forEach(tab=>tab.addEventListener('click',()=>{showDocument(tab.dataset.document);window.skillBoard?.select(tab.dataset.document);}));
   showDocument('arena');
 })();
@@ -64,6 +70,7 @@ const SKILLS = Object.freeze({
 });
 let serial = 0;
 const count = (value, fallback = 3) => Number.isFinite(Number(value)) && String(value).trim() !== '' ? Math.max(1, Math.min(12, Math.round(Number(value)))) : fallback;
+const unit = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 const el = (tag, cls) => { const n = document.createElement(tag); if (cls) n.className = cls; return n; };
 const styleText = `
 .enamel-board,.enamel-panel{box-sizing:border-box;color:#f5dfaa;font-family:Arial,Helvetica,sans-serif}
@@ -80,42 +87,40 @@ const styleText = `
 .enamel-subtitle{font-size:19px;line-height:1.25;white-space:nowrap;color:#f0daa6;text-shadow:0 1px 1px #000b}
 .enamel-select:hover .enamel-title{color:#fff0bf}
 .enamel-select:focus-visible{outline:2px solid #fff1b1;outline-offset:-3px;background:#edd39c0b}
-.enamel-panel.is-selected>.enamel-skin{filter:drop-shadow(0 0 3px #fbc957bb)}
-.enamel-panel.is-selected>.enamel-select .enamel-title{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:6px;text-decoration-color:#e5bc62}
+.enamel-panel.is-selected>.enamel-skin{filter:drop-shadow(2px 0 0 #ffe08a) drop-shadow(-2px 0 0 #ffe08a) drop-shadow(0 2px 0 #ffe08a) drop-shadow(0 -2px 0 #ffe08a) drop-shadow(0 0 9px #fbc957)}
+.enamel-panel.is-selected .enamel-title::after{content:' ✓' / '';color:#ffe08a}
+
 .enamel-recall{width:89%;height:126px}
-.enamel-architect{height:266px}
+.enamel-architect{height:293px}
 .enamel-architect>.enamel-select{bottom:auto;height:89px;top:18px}
 .enamel-architect>.enamel-icon{top:62px}
 .enamel-nested{position:absolute;left:3.8%;right:3.2%;top:111px;bottom:12px;display:grid;grid-template-columns:1.1fr 1fr;gap:12px}
-.enamel-nested>.enamel-panel{height:143px}
+.enamel-nested>.enamel-panel{height:170px}
 .enamel-nested .enamel-select{inset:20px 8px 20px 9px;padding:0 6px 0 9px;gap:10px}
 .enamel-nested .enamel-icon{left:32px;width:58px;height:58px}
 .enamel-nested .enamel-copy{margin-left:92px}
 .enamel-nested .enamel-title{font-size:31px}
 .enamel-nested .enamel-subtitle{font-size:17px;letter-spacing:-.15px}
-.enamel-swarm .enamel-select{align-items:flex-start;padding-top:24px}
+.enamel-swarm .enamel-select{align-items:flex-start;padding-top:10px}
 .enamel-swarm .enamel-copy{gap:5px}
 .enamel-swarm .enamel-title{font-size:30px}
 .enamel-swarm .enamel-subtitle{font-size:16px}
-.enamel-counter{position:absolute;right:29px;bottom:24px;display:flex;align-items:center;gap:9px;padding:3px 6px 3px 11px;border:1px solid #dec37d;border-radius:30px;box-shadow:0 1px 0 #f2d58777,inset 0 2px 4px #000b;background:#1b201cbf;font-size:16px;color:#f5e4b5;z-index:2}
-.enamel-counter input{width:47px;font:700 17px Arial,sans-serif;color:#f9e8b9;background:#050a0740;border:0;border-left:1px solid #d9b46b55;text-align:center;padding:1px 0 1px 5px;outline-offset:2px;color-scheme:dark}
+.enamel-counter{position:absolute;right:29px;bottom:24px;display:flex;align-items:center;gap:4px;min-height:44px;padding:2px 3px 2px 12px;border:1px solid #dec37d;border-radius:30px;box-shadow:0 1px 0 #f2d58777,inset 0 2px 4px #000b;background:#1b201cbf;font-size:16px;color:#f5e4b5;z-index:2}
+.enamel-counter span{margin-right:4px}.enamel-counter input{width:44px;height:40px;font:700 18px Arial,sans-serif;color:#f9e8b9;background:#050a0740;border:0;border-radius:4px;text-align:center;padding:0;outline-offset:2px;color-scheme:dark;-moz-appearance:textfield;appearance:textfield}.enamel-counter input::-webkit-inner-spin-button,.enamel-counter input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.enamel-step{width:40px;height:40px;border:0;border-radius:50%;background:#e5c37e22;color:#f9e8b9;font:700 22px/1 Arial,sans-serif;cursor:pointer;padding:0}.enamel-step:hover{background:#e5c37e44}.enamel-step:focus-visible{outline:2px solid #fff2b5;outline-offset:1px}.enamel-hint{position:absolute;right:6px;top:100%;margin-top:3px;white-space:nowrap;font-size:13px;color:#ffe08a;z-index:2;text-shadow:0 1px 1px #000}
 .enamel-counter input:focus-visible{outline:2px solid #fff2b5;border-radius:4px}
-.enamel-swarm .enamel-counter{top:45px;bottom:auto;right:22px}
+.enamel-swarm .enamel-counter{top:auto;bottom:26px;right:22px}
 .enamel-interrogate>.enamel-skin{filter:drop-shadow(0 0 2px #e7af4888)}
 .enamel-interrogate .enamel-counter{right:90px;bottom:43px}
 .enamel-interrogate .enamel-select{padding-right:260px}
 .enamel-how{height:135px}
-.enamel-ghost{position:absolute;right:0;top:48px;width:23%;height:146px;color:#a2a68b;opacity:.27;pointer-events:none}
-.enamel-ghost svg{width:100%;height:100%;overflow:visible}
-.enamel-ghost span{position:absolute;left:32%;top:43px;font:700 26px Arial,sans-serif}
-.enamel-ghost small{display:block;font-size:15px;font-weight:400;margin-top:5px;white-space:nowrap}
-.enamel-ghost .ghost-bees{position:absolute;left:5%;top:43px;width:20%;height:58px}.ghost-count{position:absolute;right:14px;top:24px;border:1px solid;border-radius:22px;font:13px Arial,sans-serif;padding:3px 8px}.enamel-tools{display:flex;align-items:center;gap:16px;margin:19px 0 0 11px;color:#bdb9a9;font-size:14px;flex-wrap:wrap}
+.enamel-tools{display:flex;align-items:center;gap:16px;margin:19px 0 0 11px;color:#bdb9a9;font-size:14px;flex-wrap:wrap}
 .enamel-reset{font:inherit;color:#f0d49b;background:#292923;border:1px solid #746044;border-radius:5px;padding:9px 15px;cursor:pointer}
 .enamel-reset:hover{background:#3a3326}.enamel-reset:focus-visible{outline:2px solid #f1d69e;outline-offset:3px}
 .enamel-status{margin:0}
-@container (max-width: 950px){.enamel-composition{width:100%}.enamel-ghost{display:none}.enamel-board{padding-left:0;padding-right:0}}
-@container (max-width: 720px){.enamel-recall{width:100%}.enamel-title{font-size:30px}.enamel-subtitle{font-size:17px}.enamel-copy{margin-left:70px}.enamel-icon{left:37px;width:56px;height:56px}.enamel-select{padding-left:42px;padding-right:20px}.enamel-architect{height:429px}.enamel-nested{top:110px;grid-template-columns:1fr;gap:5px;bottom:10px}.enamel-nested>.enamel-panel{height:149px}.enamel-nested .enamel-copy{margin-left:83px}.enamel-nested .enamel-title{font-size:30px}.enamel-nested .enamel-subtitle{font-size:17px}.enamel-swarm .enamel-select{align-items:center;padding-top:0;padding-bottom:27px}.enamel-swarm .enamel-counter{top:auto;right:26px;bottom:25px}.enamel-interrogate{height:146px}.enamel-interrogate .enamel-select{padding-right:10px;padding-bottom:35px}.enamel-interrogate .enamel-counter{right:28px;bottom:24px}.enamel-tools{margin-left:8px}.enamel-how{height:132px}}
-@container (max-width: 420px){.enamel-title{font-size:28px}.enamel-subtitle{font-size:15px}.enamel-copy{margin-left:55px}.enamel-icon{left:29px;width:48px;height:48px}.enamel-select{padding-left:30px}.enamel-nested .enamel-icon{left:25px;width:49px}.enamel-nested .enamel-copy{margin-left:75px}.enamel-nested .enamel-subtitle{font-size:15px}.enamel-nested .enamel-title{font-size:28px}.enamel-counter{font-size:14px}}
+@container (max-width: 950px){.enamel-composition{width:100%}.enamel-board{padding-left:0;padding-right:0}}
+@container (max-width: 720px){.enamel-recall{width:100%}.enamel-title{font-size:30px}.enamel-subtitle{font-size:17px}.enamel-copy{margin-left:70px}.enamel-icon{left:37px;width:56px;height:56px}.enamel-select{padding-left:42px;padding-right:20px}.enamel-architect{height:483px}.enamel-nested{top:110px;grid-template-columns:1fr;gap:5px;bottom:10px}.enamel-nested>.enamel-panel{height:176px}.enamel-nested .enamel-copy{margin-left:83px}.enamel-nested .enamel-title{font-size:30px}.enamel-nested .enamel-subtitle{font-size:17px}.enamel-swarm .enamel-select{align-items:center;padding-top:0;padding-bottom:64px}.enamel-swarm .enamel-counter{top:auto;right:26px;bottom:26px}.enamel-interrogate{height:176px}.enamel-interrogate .enamel-select{padding-right:10px;padding-bottom:64px}.enamel-interrogate .enamel-counter{right:28px;bottom:26px}.enamel-tools{margin-left:8px}.enamel-how{height:132px}}
+@container (max-width: 420px){.enamel-subtitle{white-space:normal}.enamel-rivets{display:none}.enamel-title{font-size:28px}.enamel-subtitle{font-size:15px}.enamel-copy{margin-left:55px}.enamel-icon{left:29px;width:48px;height:48px}.enamel-select{padding-left:30px}.enamel-nested .enamel-icon{left:25px;width:49px}.enamel-nested .enamel-copy{margin-left:75px}.enamel-nested .enamel-subtitle{font-size:15px}.enamel-nested .enamel-title{font-size:28px}.enamel-counter{font-size:14px}}
 @media(prefers-reduced-motion:reduce){.enamel-board *{scroll-behavior:auto;transition:none}}
 `;
 const ornaments = `<g fill="none" stroke="currentColor" stroke-width=".9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 89C34 81 42 60 31 45C25 36 10 44 16 53C20 58 28 53 23 49M10 86C7 65 15 33 34 15M11 73C24 76 35 71 36 63C25 62 20 63 11 73M13 61C3 60 1 50 6 43C15 48 16 52 13 61M20 45C30 44 37 34 34 27C24 29 21 33 20 45M25 30C18 23 19 15 25 11C30 18 31 22 25 30M30 23C41 23 45 15 42 8C34 11 31 14 30 23M6 90C26 96 45 92 47 77C48 66 38 64 39 72C40 78 45 73 42 70"/><path d="M11 73l22-8M13 60L7 47M20 44l12-14M25 29V15M30 23l10-11M6 90C3 86 3 82 6 78M8 83l-3-1M12 77l-3-3"/><g transform="translate(36 13)"><path d="M0 0C-11-12-16-3-5 1C-19 2-15 12-4 5C-7 19 5 17 3 5C14 13 20 3 6 1C18-7 9-14 3-3C7-17-5-17 0-3Z"/><circle r="2" fill="currentColor"/></g><path d="M40 89q11 2 13-5q2-6-3-6q-3 1-1 4M5 18q2-14 16-14q10 0 12 6M6 19q6-6 10-4M4 23q1-4 3-5"/></g>`;
@@ -150,7 +155,7 @@ function skin(skill, id, size = {}) {
     const x=random()*w,y=i%2===0?17+random()*7:h-8-random()*8, r=1+random()*4;
     corrosion+=`<path d="M${x.toFixed(1)} ${y.toFixed(1)}l${r.toFixed(1)} -2l${(r*.5).toFixed(1)} 5l-${r.toFixed(1)} 3z" fill="${i%3===0?'#0b5c59':i%3===1?'#704325':'#f1c579'}" opacity=".78"/>`;
   }
-  return `<svg class="enamel-skin" viewBox="0 0 ${w} ${h+8}" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="${id}-gold" x2=".2" y2="1"><stop stop-color="#fff0aa"/><stop offset=".2" stop-color="#a67b36"/><stop offset=".46" stop-color="#e5c078"/><stop offset=".7" stop-color="#68431f"/><stop offset="1" stop-color="#e8b767"/></linearGradient><linearGradient id="${id}-base" x2=".4" y2="1"><stop stop-color="${c}"/><stop offset=".43" stop-color="${c}"/><stop offset="1" stop-color="#191d18"/></linearGradient><radialGradient id="${id}-light"><stop stop-color="#d1b27b" stop-opacity=".10"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient><filter id="${id}-grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".24" numOctaves="3" seed="${skill.length*11}"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".06"/></feComponentTransfer><feBlend in="SourceGraphic" mode="soft-light"/></filter><filter id="${id}-patina" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="3" seed="${skill.length*7}"/><feColorMatrix values="0 0 0 0 .65 0 0 0 0 .44 0 0 0 0 .19 4 0 0 0 -2.35"/></filter><clipPath id="${id}-clip"><path d="${shape}"/></clipPath></defs><path d="${shape}" fill="url(#${id}-gold)" stroke="#301f0e" stroke-width="2"/><g clip-path="url(#${id}-clip)"><path d="${shape}" transform="translate(5 3) scale(${(w-10)/w} ${(h-6)/h})" fill="url(#${id}-base)" filter="url(#${id}-grain)" stroke="#19160d" stroke-width="1.4"/><ellipse cx="${w*.65}" cy="${h*.32}" rx="${w*.42}" ry="${h*.7}" fill="url(#${id}-light)"/><rect width="${w}" height="${h}" filter="url(#${id}-patina)" opacity=".23"/>${wear}<path d="${shape}" transform="translate(10 8) scale(${(w-20)/w} ${(h-16)/h})" fill="none" stroke="#ceab61" stroke-width="1.1" opacity=".8"/><path d="${shape}" transform="translate(14 11) scale(${(w-28)/w} ${(h-22)/h})" fill="none" stroke="#917644" stroke-width=".7" opacity=".8"/>${corrosion}<g color="#c39e56" opacity=".9" transform="translate(15 24) scale(.83)">${ornaments}</g><g color="#d5b56e" opacity=".85" transform="translate(${w-15} 24) scale(-.83 .83)">${ornaments}</g><g color="#b8944e" opacity=".6" transform="translate(${w-80} ${h-24}) rotate(180) scale(.46)">${ornaments}</g></g><path d="${shape}" fill="none" stroke="#f0d08a" stroke-width="1.2"/><path d="${shape}" transform="translate(3 2) scale(${(w-6)/w} ${(h-4)/h})" fill="none" stroke="#422911" stroke-width="1.3"/>${skill==='interrogate'?`<g fill="#dba24a" stroke="#f5d082" stroke-width="1">${[0,1,2].map(y=>[0,1].map(x=>`<circle cx="${w-53+x*13}" cy="${h*.39+y*14}" r="4"/>`).join('')).join('')}</g>`:''}</svg>`;
+  return `<svg class="enamel-skin" viewBox="0 0 ${w} ${h+8}" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="${id}-gold" x2=".2" y2="1"><stop stop-color="#fff0aa"/><stop offset=".2" stop-color="#a67b36"/><stop offset=".46" stop-color="#e5c078"/><stop offset=".7" stop-color="#68431f"/><stop offset="1" stop-color="#e8b767"/></linearGradient><linearGradient id="${id}-base" x2=".4" y2="1"><stop stop-color="${c}"/><stop offset=".43" stop-color="${c}"/><stop offset="1" stop-color="#191d18"/></linearGradient><radialGradient id="${id}-light"><stop stop-color="#d1b27b" stop-opacity=".10"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient><filter id="${id}-grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".24" numOctaves="3" seed="${skill.length*11}"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".06"/></feComponentTransfer><feBlend in="SourceGraphic" mode="soft-light"/></filter><filter id="${id}-patina" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="3" seed="${skill.length*7}"/><feColorMatrix values="0 0 0 0 .65 0 0 0 0 .44 0 0 0 0 .19 4 0 0 0 -2.35"/></filter><clipPath id="${id}-clip"><path d="${shape}"/></clipPath></defs><path d="${shape}" fill="url(#${id}-gold)" stroke="#301f0e" stroke-width="2"/><g clip-path="url(#${id}-clip)"><path d="${shape}" transform="translate(5 3) scale(${(w-10)/w} ${(h-6)/h})" fill="url(#${id}-base)" filter="url(#${id}-grain)" stroke="#19160d" stroke-width="1.4"/><ellipse cx="${w*.65}" cy="${h*.32}" rx="${w*.42}" ry="${h*.7}" fill="url(#${id}-light)"/><rect width="${w}" height="${h}" filter="url(#${id}-patina)" opacity=".23"/>${wear}<path d="${shape}" transform="translate(10 8) scale(${(w-20)/w} ${(h-16)/h})" fill="none" stroke="#ceab61" stroke-width="1.1" opacity=".8"/><path d="${shape}" transform="translate(14 11) scale(${(w-28)/w} ${(h-22)/h})" fill="none" stroke="#917644" stroke-width=".7" opacity=".8"/>${corrosion}<g color="#c39e56" opacity=".9" transform="translate(15 24) scale(.83)">${ornaments}</g><g color="#d5b56e" opacity=".85" transform="translate(${w-15} 24) scale(-.83 .83)">${ornaments}</g><g color="#b8944e" opacity=".6" transform="translate(${w-80} ${h-24}) rotate(180) scale(.46)">${ornaments}</g></g><path d="${shape}" fill="none" stroke="#f0d08a" stroke-width="1.2"/><path d="${shape}" transform="translate(3 2) scale(${(w-6)/w} ${(h-4)/h})" fill="none" stroke="#422911" stroke-width="1.3"/>${skill==='interrogate'?`<g class="enamel-rivets" fill="#dba24a" stroke="#f5d082" stroke-width="1">${[0,1,2].map(y=>[0,1].map(x=>`<circle cx="${w-53+x*13}" cy="${h*.39+y*14}" r="4"/>`).join('')).join('')}</g>`:''}</svg>`;
 }
 /** Returns a DOM panel with update(), snapshot(), dispose() and selectionButton. */
 function createSkillPanel(data = {}, options = {}) {
@@ -170,20 +175,31 @@ function createSkillPanel(data = {}, options = {}) {
   const button = el('button', 'enamel-select'); button.type = 'button'; button.dataset.skill = skill;
   const copy = el('span','enamel-copy'), title = el('span','enamel-title'), subtitle = el('span','enamel-subtitle');
   copy.append(title,subtitle);button.append(copy);root.append(button);
-  const select = () => options.onSelect?.(skill,root.snapshot()); button.addEventListener('click',select);
-  let input, counter, change;
+  const select = () => options.onSelect?.(skill,root.snapshot(),'button'); button.addEventListener('click',select);
+  let input, counter, change, commit, minus, plus, hint, hintTimer, stepBy, onMinus, onPlus, onFocusIn;
+  const renderCount = () => { if(!input)return; input.value=state.count; minus.disabled=state.count<=1; plus.disabled=state.count>=12; };
   if(skill==='swarm'||skill==='interrogate') {
-    counter = el('label','enamel-counter'); const label = el('span'); label.textContent = skill==='swarm'?'slices':'reviewers';
-    input=el('input'); input.type='number';input.min='1';input.max='12';input.step='1';input.setAttribute('aria-label',skill==='swarm'?'Swarm slices':'Interrogate reviewers');
-    counter.append(label,input);root.append(counter);
-    change=()=>{ if(disposed)return; state.count=count(input.value,state.count);input.value=state.count;options.onCount?.(state.count,skill); };
-    input.addEventListener('change',change);
+    const noun = skill==='swarm'?'slices':'reviewers', who = skill==='swarm'?'Swarm slices':'Interrogate reviewers';
+    counter = el('div','enamel-counter'); counter.setAttribute('role','group'); counter.setAttribute('aria-label',who); const label = el('span'); label.textContent = noun; label.setAttribute('aria-hidden','true');
+    input=el('input'); input.type='number';input.min='1';input.max='12';input.step='1';input.title='1\u201312';input.setAttribute('aria-label',who);
+    minus=el('button','enamel-step'); minus.type='button'; minus.textContent='\u2212'; minus.setAttribute('aria-label','Fewer '+noun);
+    plus=el('button','enamel-step'); plus.type='button'; plus.textContent='+'; plus.setAttribute('aria-label','More '+noun);
+    hint=el('span','enamel-hint'); hint.setAttribute('aria-hidden','true');
+    counter.append(label,minus,input,plus,hint);root.append(counter);
+    commit=(raw)=>{ if(disposed)return; const text=String(raw).trim(), n=Number(text), next=count(raw,state.count); const adjusted=text!==''&&Number.isFinite(n)&&next!==n; state.count=next;input.value=next;
+      clearTimeout(hintTimer); hint.textContent=adjusted?`Limited to 1\u201312`:''; if(adjusted)hintTimer=setTimeout(()=>{hint.textContent='';},4000);
+      renderCount(); options.onCount?.(next,skill,{adjusted,raw:text}); };
+    change=()=>commit(input.value);
+    stepBy=(d)=>()=>commit(state.count+d);
+    onMinus=stepBy(-1); onPlus=stepBy(+1);
+    onFocusIn=()=>options.onSelect?.(skill,root.snapshot(),'counter');
+    input.addEventListener('change',change); minus.addEventListener('click',onMinus); plus.addEventListener('click',onPlus); counter.addEventListener('focusin',onFocusIn);
   }
-  const render = () => { title.textContent=state.title;subtitle.textContent=state.subtitle;button.setAttribute('aria-pressed',String(state.selected));root.classList.toggle('is-selected',state.selected); if(input)input.value=state.count; };
+  const render = () => { title.textContent=state.title;subtitle.textContent=state.subtitle;button.setAttribute('aria-pressed',String(state.selected));root.classList.toggle('is-selected',state.selected); renderCount(); };
   root.selectionButton=button;
   root.snapshot=()=>({...state});
   root.update=(patch={})=>{if(disposed)return root.snapshot();if(patch.title!==undefined)state.title=String(patch.title);if(patch.subtitle!==undefined)state.subtitle=String(patch.subtitle);if(patch.selected!==undefined)state.selected=Boolean(patch.selected);if(patch.count!==undefined)state.count=count(patch.count,state.count);render();return root.snapshot();};
-  root.dispose=()=>{if(disposed)return;disposed=true;observer.disconnect();button.removeEventListener('click',select);if(input)input.removeEventListener('change',change);root.remove();};
+  root.dispose=()=>{if(disposed)return;disposed=true;observer.disconnect();button.removeEventListener('click',select);clearTimeout(hintTimer);if(input){input.removeEventListener('change',change);minus.removeEventListener('click',onMinus);plus.removeEventListener('click',onPlus);counter.removeEventListener('focusin',onFocusIn);}root.remove();};
   render();return root;
 }
 /** Owns one appended child only. Options: selected, slices, reviewers, onChange. */
@@ -195,17 +211,17 @@ function createSkillBoard(host, options = {}) {
   const css=el('style');css.textContent=styleText;root.append(css);
   const composition=el('div','enamel-composition');root.append(composition);
   const panels=new Map();
+  let note='';
   const emit=(reason)=>options.onChange?.({...state},{reason});
-  const refresh=()=>{for(const [name,panel]of panels)panel.update({selected:state.selected===name,count:name==='swarm'?state.slices:state.reviewers});status.textContent=`${SKILLS[state.selected].title} selected · ${state.slices} slices · ${state.reviewers} reviewers`;};
-  function select(skill){if(disposed)return;if(Object.hasOwn(SKILLS,skill)){state.selected=skill;refresh();emit('selection');}}
+  const refresh=()=>{for(const [name,panel]of panels)panel.update({selected:state.selected===name,count:name==='swarm'?state.slices:state.reviewers});status.textContent=`${SKILLS[state.selected].title} selected · ${unit(state.slices,'slice')} · ${unit(state.reviewers,'reviewer')}${note?' · '+note:''}`;};
+  function select(skill,via){if(disposed)return;if(Object.hasOwn(SKILLS,skill)){if(via==='counter'&&state.selected===skill)return;state.selected=skill;note='';refresh();emit(via==='counter'?'counter-selection':'selection');}}
   for(const skill of Object.keys(SKILLS)) {
-    const panel=createSkillPanel({skill,count:skill==='swarm'?state.slices:state.reviewers},{includeStyle:false,onSelect:select,onCount:(value,name)=>{if(disposed)return;state[name==='swarm'?'slices':'reviewers']=value;refresh();emit('count');}}); panels.set(skill,panel);
+    const panel=createSkillPanel({skill,count:skill==='swarm'?state.slices:state.reviewers},{includeStyle:false,onSelect:(skill,_snapshot,via)=>select(skill,via),onCount:(value,name,info={})=>{if(disposed)return;const key=name==='swarm'?'slices':'reviewers';state[key]=value;note=info.adjusted?`${key} limited to 1\u201312 (entered ${info.raw})`:'';refresh();emit('count');}}); panels.set(skill,panel);
   }
   const architect=panels.get('architect'),nested=el('div','enamel-nested');nested.setAttribute('aria-label','Skills nested inside Architect');nested.append(panels.get('arena'),panels.get('swarm'));architect.append(nested);
   composition.append(panels.get('recall'),architect,panels.get('interrogate'),panels.get('how'));
-  const ghost=el('div','enamel-ghost');ghost.setAttribute('aria-hidden','true');ghost.innerHTML='<svg viewBox="0 0 260 140"><path d="M10 28H45V16Q45 8 53 8H88Q96 8 96 16V28H244V124H96V132H45V124H10Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 6"/><path d="M2 37H260M20 0V140M250 0V140M2 116H260" fill="none" stroke="currentColor" stroke-dasharray="4 6"/></svg><span>Swarm<small>Work in parallel slices</small></span>';const bee=document.createElementNS('http://www.w3.org/2000/svg','svg');bee.setAttribute('viewBox','0 0 64 68');bee.setAttribute('class','ghost-bees');bee.innerHTML='<g fill="none" stroke="currentColor" stroke-width="1.7">'+icons.swarm+'</g>';ghost.append(bee);const badge=el('i','ghost-count');badge.textContent='slices 3';ghost.append(badge);root.append(ghost);
   const tools=el('div','enamel-tools'),reset=el('button','enamel-reset'),status=el('p','enamel-status');reset.type='button';reset.textContent='Reset composition';status.setAttribute('role','status');status.setAttribute('aria-live','polite');tools.append(reset,status);root.append(tools);
-  function resetState(){if(disposed)return;state={...initial};refresh();emit('reset');}
+  function resetState(){if(disposed)return;state={...initial};note='';refresh();emit('reset');}
   reset.addEventListener('click',resetState);host.append(root);refresh();
   return {element:root,panels,snapshot:()=>({...state}),getState:()=>({...state}),select,updatePanel(skill,patch={}){if(disposed)return;const presentation={};if(patch.title!==undefined)presentation.title=patch.title;if(patch.subtitle!==undefined)presentation.subtitle=patch.subtitle;panels.get(skill)?.update(presentation);},resize(){if(!disposed)panels.forEach(panel=>panel.resize());},update(patch={}){if(disposed)return {...state};if(Object.hasOwn(SKILLS,patch.selected))state.selected=patch.selected;if(patch.slices!==undefined)state.slices=count(patch.slices,state.slices);if(patch.reviewers!==undefined)state.reviewers=count(patch.reviewers,state.reviewers);refresh();emit('update');return {...state};},reset:resetState,dispose(){if(disposed)return;disposed=true;reset.removeEventListener('click',resetState);for(const panel of panels.values())panel.dispose();root.remove();}};
 }
@@ -218,7 +234,7 @@ window.componentFactories={createSkillBoard,createSkillPanel};
 const host=document.getElementById('board');
 try{
   const fallback=host.querySelector('.fallback');
-  window.skillBoard=createSkillBoard(host,{selected:'arena',slices:3,reviewers:3,onChange:(state)=>window.showSkillDocument(state.selected)});
+  window.skillBoard=createSkillBoard(host,{selected:'arena',slices:3,reviewers:3,onChange:(state,info)=>{window.showSkillDocument(state.selected);if(info.reason==='selection')window.revealSkillDocument();}});
   fallback?.remove();
 }catch(error){
   const fallback=host.querySelector('.fallback');
