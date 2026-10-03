@@ -28,7 +28,7 @@ def canonical_packet(root, template):
     # All instruction/reference bytes participate; the digest is provenance,
     # not an authenticity check or a guarantee that a local copy is current.
     sources = {
-        str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
+        path.relative_to(root).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
         for path in sorted((root / "skills").rglob("*"))
         if path.is_file()
     }
