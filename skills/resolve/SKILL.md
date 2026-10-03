@@ -13,7 +13,7 @@ Interrogate decides what is wrong; Resolve changes the code and proves each chan
 
 Locate the Interrogate `report.md` the user names, or the latest Interrogate run for the target. Without one, ask for a review or run Interrogate first; do not invent findings. Record the source run, its reviewed base and head, and its verdict. An `inconclusive` source states its coverage gap in the brief; a `no-supported-issues` source needs nothing unless the user selects findings.
 
-Compare the current target with the reviewed head. When it has moved, recheck each selected finding against the current code before editing. A finding that no longer reproduces is recorded as `invalid` with the evidence, not silently skipped.
+Compare the current target with the reviewed head. When it has moved, recheck each selected finding against both revisions before editing: one that reproduces on the reviewed head but not the current target is `already-fixed` (cite the fixing revision); one that never reproduces is `invalid`. Neither is silently skipped.
 
 ## Fix the scope
 
@@ -36,4 +36,4 @@ Parallel fixers are optional and limited to findings that touch disjoint files. 
 
 Run the project's full checks against the final tree, not only per-finding probes. When re-review is configured or requested, run a scoped Interrogate on the fix diff alone and link its report; otherwise state that the fixes were not independently reviewed.
 
-Save `report.md` with the source run, scope, ledger, discovered findings, full verification results, and verdict: `resolved` when every selected finding is `fixed` or `invalid` and all checks pass, `partial` when any selected finding remains open or a check is unverified, `blocked` when required access or a failing baseline prevents progress. Leave changes uncommitted unless the user asked for a commit; propose a commit message that lists the finding IDs addressed.
+Save `report.md` with the source run, scope, ledger, discovered findings, full verification results, and verdict: `resolved` when every selected finding is closed (`fixed`, `already-fixed`, or `invalid`) and all checks pass, `partial` when any selected finding remains open or a check is unverified, `blocked` when required access or a failing baseline prevents progress. Leave changes uncommitted unless the user asked for a commit; propose a commit message that lists the finding IDs addressed.

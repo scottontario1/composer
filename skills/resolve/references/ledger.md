@@ -6,11 +6,12 @@
 | --- | --- | --- |
 | `fixed` | The change resolves the finding. | A check that failed or reproduced the defect before the change and passes after it. |
 | `fixed-unverified` | The change is applied but no practical check exists. | The reason a check is impractical and what was inspected instead. Counts as open for the verdict. |
-| `invalid` | Reproduction disproved the finding, or the current target no longer has it. | The attempted reproduction and its result. |
+| `already-fixed` | The finding was real, but a change made after the review removed it. | The fixing revision, and a check that fails on the reviewed head and passes on the current target. |
+| `invalid` | Reproduction disproved the finding on the reviewed head. | The attempted reproduction and its result. |
 | `deferred` | Deliberately left for later. | The user's decision or the stated dependency. |
 | `blocked` | Cannot proceed. | The conflicting constraint, missing access, or failing baseline. |
 
-Only `fixed` and `invalid` close a finding. A passing suite alone does not make a finding `fixed`; the check must exercise the reported defect. Do not claim a command ran unless it did.
+Only `fixed`, `already-fixed`, and `invalid` close a finding. A passing suite alone does not make a finding `fixed`; the check must exercise the reported defect. Do not claim a command ran unless it did.
 
 ## Discovered findings
 
