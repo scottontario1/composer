@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Composer · Enamel skill composition</title>
+<style>
+:root{color-scheme:dark;font-family:Arial,Helvetica,sans-serif;color:#e7dfcb;background:#1c1e1d}*{box-sizing:border-box}body{margin:0;min-width:320px;background:radial-gradient(circle,#5b5f5580 .9px,transparent 1.2px) 10px 10px/28px 28px,#1c1e1d}button,input{font:inherit}a{color:#e4c78c}main{max-width:1190px;margin:auto;padding:28px 28px 48px}.page-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;border-bottom:1px solid #5e574241;padding-bottom:16px}h1{font-size:23px;font-weight:500;letter-spacing:-.5px;margin:0;color:#e4d5b6}.page-head p{font-size:13px;margin:0;color:#aeae9f}.board-host{min-height:650px}.fallback{padding:20px 14px;color:#c9c1af}.fallback strong{color:#efd39b}.fallback ul{display:flex;flex-wrap:wrap;gap:16px;list-style:none;padding:0}.fallback button,.doc-tab{background:#262923;border:1px solid #7b704f;color:#ecd5a4;border-radius:4px;padding:9px 12px;cursor:pointer}.fallback button:focus-visible,.doc-tab:focus-visible{outline:2px solid #f5dba5;outline-offset:3px}.selected-summary{margin:24px 8px 0;padding-top:22px;border-top:1px solid #71613f70}.selected-summary h2{font:400 26px Georgia,serif;color:#ecd4a0;margin:0 0 8px}.selected-summary p{font-size:14px;line-height:1.6;color:#b1b3a6;max-width:76ch;margin:0}.docs{margin-top:22px;padding-top:25px;border-top:1px solid #71613f70}.docs-head{display:flex;gap:24px;justify-content:space-between;align-items:baseline;margin-bottom:20px}.docs h2{font:500 26px Georgia,serif;margin:0;color:#ecd4a0}.docs-head p{font-size:14px;color:#b1b3a6;margin:0}.doc-nav{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 20px}.doc-tab[aria-pressed="true"]{border-color:#e5c77d;background:#463b26;box-shadow:inset 0 0 0 1px #c7a15c33}.doc-tab:hover{background:#3a362b}.doc-sheet{background:#191d1bec;border:1px solid #63583c;border-radius:7px;padding:25px 28px;box-shadow:0 6px 25px #0003}.docs-head a{color:#e4c78c}.docs{scroll-margin-top:12px}.doc-sheet h3{font:500 24px Georgia,serif;color:#e6cf99;margin:0 0 17px}.doc-body{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:15px/1.7 Arial,Helvetica,sans-serif;color:#d6d3c7;max-width:84ch}.doc-note{color:#b5b8a9;font-size:13px;margin:17px 0 0}.footer{color:#9c9e92;font-size:12px;margin-top:24px}@media(max-width:720px){main{padding:20px 15px 30px}.page-head{display:block}.page-head p{margin-top:8px}.board-host{min-height:unset}.docs-head{display:block}.docs-head p{margin-top:10px}.doc-sheet{padding:20px 16px}.doc-body{font-size:14px}.doc-tab{padding:9px 10px}}
+</style>
+</head>
+<body>
+<main>
+<header class="page-head"><h1>Composer</h1><p>Select a skill to read its full instructions.</p></header>
+<div id="board" class="board-host">
+<div class="fallback"><strong>Skill composition</strong><p>If the decorative preview is unavailable, use the skill buttons below to read the full instructions.</p></div>
+</div>
+<section class="selected-summary" aria-live="polite"><h2 id="selected-name">Arena</h2><p id="selected-description"></p></section>
+<section class="docs" id="instructions" aria-labelledby="docs-title">
+<div class="docs-head"><h2 id="docs-title">Skill instructions</h2><p><a href="#board">↑ Back to skills</a></p></div>
+<nav class="doc-nav" aria-label="Skill documentation">
+<button type="button" class="doc-tab" data-document="recall" aria-pressed="false">Recall</button>
+<button type="button" class="doc-tab" data-document="architect" aria-pressed="false">Architect</button>
+<button type="button" class="doc-tab" data-document="arena" aria-pressed="true">Arena</button>
+<button type="button" class="doc-tab" data-document="swarm" aria-pressed="false">Swarm</button>
+<button type="button" class="doc-tab" data-document="interrogate" aria-pressed="false">Interrogate</button>
+<button type="button" class="doc-tab" data-document="how" aria-pressed="false">How</button>
+</nav>
+<article class="doc-sheet" aria-labelledby="document-title"><h3 id="document-title">Arena</h3><pre class="doc-body" id="document-body">The full Arena instructions will appear here when the canonical skill packet is included.</pre><p id="document-note" class="doc-note">Full canonical instructions are provided by the bundled skill packet.</p></article>
+</section>
+<p class="footer">A local composition preview. Swarm slices configure this preview; Swarm’s canonical option is its aggregation mode.</p>
+</main>
+<script id="skill-docs" type="application/json">{}</script>
+<script>
+// Documentation deliberately initializes without importing the preview module.
+(function(){
+  const titles={recall:'Recall',architect:'Architect',arena:'Arena',swarm:'Swarm',interrogate:'Interrogate',how:'How'};
+  const descriptions={recall:'Rebuild scoped working context and reconcile past claims with live project state.',architect:'Settle interfaces, ownership, and module boundaries before consequential implementation.',arena:'Generate competing answers to one brief, judge them, and synthesize one artifact.',swarm:'Cover independent slices or run an explicitly defined race with parallel workers.',interrogate:'Review a fixed change or artifact and triage evidence-backed findings.',how:'Explain repository mechanics in a detailed, styled, standalone HTML page.'};
+  let packet={};
+  try{packet=JSON.parse(document.getElementById('skill-docs').textContent);if(!packet||typeof packet!=='object')packet={};}catch(error){document.getElementById('document-note').textContent='The instruction packet could not be read. The composition controls remain available.';}
+  const tabs=Array.from(document.querySelectorAll('[data-document]'));
+  function showDocument(skill){
+    if(!Object.hasOwn(titles,skill))return;
+    document.getElementById('document-title').textContent=titles[skill];document.getElementById('selected-name').textContent=titles[skill];document.getElementById('selected-description').textContent=descriptions[skill];
+    const text=packet[skill];
+    document.getElementById('document-body').textContent=typeof text==='string'?text:'The full '+titles[skill]+' instructions will appear here when the canonical skill packet is included.';
+    document.getElementById('document-note').textContent=typeof text==='string'?'Full canonical skill instructions.':'Full canonical instructions are provided by the bundled skill packet.';
+    tabs.forEach(tab=>tab.setAttribute('aria-pressed',String(tab.dataset.document===skill)));
+  }
+  window.showSkillDocument=showDocument;
+  window.revealSkillDocument=function(){
+    const title=document.getElementById('document-title'),box=title.getBoundingClientRect();
+    if(box.top>=0&&box.bottom<=window.innerHeight)return;
+    const calm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.getElementById('instructions').scrollIntoView({behavior:calm?'auto':'smooth',block:'start'});
+  };
+  tabs.forEach(tab=>tab.addEventListener('click',()=>{showDocument(tab.dataset.document);window.skillBoard?.select(tab.dataset.document);}));
+  showDocument('arena');
+})();
+</script>
+<script type="module">
+import { createSkillBoard, createSkillPanel } from './components.js';
+window.componentFactories={createSkillBoard,createSkillPanel};
+const host=document.getElementById('board');
+try{
+  const fallback=host.querySelector('.fallback');
+  window.skillBoard=createSkillBoard(host,{selected:'arena',slices:3,reviewers:3,onChange:(state,info)=>{window.showSkillDocument(state.selected);if(info.reason==='selection')window.revealSkillDocument();}});
+  fallback?.remove();
+}catch(error){
+  const fallback=host.querySelector('.fallback');
+  if(fallback)fallback.querySelector('p').textContent='The decorative preview could not initialize. Use the skill buttons below to read the full instructions.';
+  console.error('Skill composition could not initialize:',error);
+}
+</script>
+</body>
+</html>
