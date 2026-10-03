@@ -8,7 +8,7 @@ import { notesSection } from "./notes.js";
 import { deletionPreview } from "../store/workspace-store.js";
 import { executionOrder } from "../domain/workflow.js";
 import { promptIssues } from "../prompt/compiler.js";
-import { EFFORTS, MODES } from "../domain/catalog.js";
+import { EFFORTS, MODES, SCOPES } from "../domain/catalog.js";
 import { slotOf, freeSlots, parseSlot } from "../domain/grid.js";
 import { LIMITS } from "../domain/schema.js";
 
@@ -106,6 +106,7 @@ export function openStepSheet(id) {
     let from = candidates[0]?.[0] ?? "";
     const optionControl = !p.option ? null
       : p.option === "mode" ? field(p.optionLabel, select("opt", MODES.map(m => [m, m]), s.options.mode, v => update({ options: { ...s.options, mode: v } })))
+      : p.option === "scope" ? field(p.optionLabel, select("opt", SCOPES.map(m => [m, m]), s.options.scope, v => update({ options: { ...s.options, scope: v } })))
       : p.option === "timeWindow" ? field(p.optionLabel, text("opt", s.options.timeWindow ?? "", v => update({ options: { ...s.options, timeWindow: v } })))
       : field(p.optionLabel, text("opt", String(s.options[p.option] ?? ""), v => update({ options: { ...s.options, [p.option]: v.trim() === "" ? "" : Number(v) } }), { inputmode: "numeric" }));
     return h("div", { class: "stack" },

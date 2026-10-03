@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createStore } from "../store/workspace-store.js";
-import { stepDefaults, PRESENTATION } from "../domain/catalog.js";
+import { stepDefaults, optionIssues, PRESENTATION } from "../domain/catalog.js";
 import { compilePrompt } from "../prompt/compiler.js";
 import { contextPreview } from "../domain/references.js";
 import { createRepository, KEYS } from "../io/local-repository.js";
@@ -277,4 +277,11 @@ test("prompt inputs fall back to the skill title for a blank upstream label", ()
   const r = compilePrompt(store.snapshot(), bundle);
   assert.equal(r.ok, true);
   assert.ok(r.text.includes(`Inputs: Recall [${a}] → context/recall.md`));
+});
+
+test("resolve steps default to act-on scope and reject unknown scopes", () => {
+  const step = stepDefaults("resolve", catalog, { resolve: { scope: "act-on-and-consider" } });
+  assert.equal(step.options.scope, "act-on-and-consider");
+  assert.deepEqual(optionIssues({ ...step, id: "r" }, catalog), []);
+  assert.equal(optionIssues({ ...step, id: "r", options: { scope: "everything" } }, catalog)[0].code, "ready.options");
 });

@@ -182,7 +182,7 @@ button.link { min-width: 44px; }
 <main id="main" role="tabpanel" tabindex="-1"></main>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <noscript><p style="padding:16px">Composer needs JavaScript. Open this file in a current browser.</p></noscript>
-<script id="orch-bundle" type="application/json">{"version":1,"skills":[{"name":"architect","description":"Settle caller-facing interfaces, data shapes, ownership, and module boundaries through competing design sketches before consequential implementation. Use for architecture requests or changes whose shape needs deliberate design.","path":"skills/architect/SKILL.md"},{"name":"arena","description":"Generate independent candidates for the same design, code, or writing task, compare them against a rubric, and synthesize one artifact. Use for competing proposals or an explicit arena request.","path":"skills/arena/SKILL.md"},{"name":"how","description":"Explain subsystem mechanics, runtime flow, ownership, and boundaries as a detailed styled standalone HTML page grounded in repository evidence. Use for architecture walkthroughs, onboarding, or how-does-this-work requests.","path":"skills/how/SKILL.md"},{"name":"interrogate","description":"Review a fixed diff, branch, design, or artifact using independent reviewers, then triage findings with evidence and reasons. Use for adversarial review or an explicit interrogate request.","path":"skills/interrogate/SKILL.md"},{"name":"recall","description":"Reconstruct recent work on a topic from scoped conversation history, project artifacts, and live records, then produce a concise current-state brief. Use for catch-me-up, resume-context, or where-did-I-leave-off requests.","path":"skills/recall/SKILL.md"},{"name":"swarm","description":"Distribute independent task slices or declared race arms across workers and aggregate one evidence-backed report. Use for parallel coverage, exploration, or an explicit swarm request.","path":"skills/swarm/SKILL.md"}],"config":{"version":1,"concurrency":3,"evidence_retry_limit":1,"roles":{"candidate":{"model":null,"reasoning_effort":null},"worker":{"model":null,"reasoning_effort":null},"reviewer":{"model":null,"reasoning_effort":null},"judge":{"model":null,"reasoning_effort":null},"synthesizer":{"model":null,"reasoning_effort":null},"explorer":{"model":null,"reasoning_effort":null},"explainer":{"model":null,"reasoning_effort":null}},"defaults":{"arena":{"candidates":3},"swarm":{"mode":"coverage"},"interrogate":{"reviewers":3},"architect":{"candidates":3},"how":{"explorers":3}}},"source_sha256":"051e3e681228a26b27e4513d3aae47c81a77a6eba7406303fb03b220f1a9c417","built_at":"2026-10-03T08:22:18+00:00"}</script>
+<script id="orch-bundle" type="application/json">{"version":1,"skills":[{"name":"architect","description":"Settle caller-facing interfaces, data shapes, ownership, and module boundaries through competing design sketches before consequential implementation. Use for architecture requests or changes whose shape needs deliberate design.","path":"skills/architect/SKILL.md"},{"name":"arena","description":"Generate independent candidates for the same design, code, or writing task, compare them against a rubric, and synthesize one artifact. Use for competing proposals or an explicit arena request.","path":"skills/arena/SKILL.md"},{"name":"how","description":"Explain subsystem mechanics, runtime flow, ownership, and boundaries as a detailed styled standalone HTML page grounded in repository evidence. Use for architecture walkthroughs, onboarding, or how-does-this-work requests.","path":"skills/how/SKILL.md"},{"name":"interrogate","description":"Review a fixed diff, branch, design, or artifact using independent reviewers, then triage findings with evidence and reasons. Use for adversarial review or an explicit interrogate request.","path":"skills/interrogate/SKILL.md"},{"name":"recall","description":"Reconstruct recent work on a topic from scoped conversation history, project artifacts, and live records, then produce a concise current-state brief. Use for catch-me-up, resume-context, or where-did-I-leave-off requests.","path":"skills/recall/SKILL.md"},{"name":"resolve","description":"Implement and verify the accepted findings of an Interrogate report: reproduce each one, apply the smallest root-cause fix, add a regression check, and record per-finding outcomes. Use after Interrogate or when asked to apply review fixes.","path":"skills/resolve/SKILL.md"},{"name":"swarm","description":"Distribute independent task slices or declared race arms across workers and aggregate one evidence-backed report. Use for parallel coverage, exploration, or an explicit swarm request.","path":"skills/swarm/SKILL.md"}],"config":{"version":1,"concurrency":3,"evidence_retry_limit":1,"roles":{"candidate":{"model":null,"reasoning_effort":null},"worker":{"model":null,"reasoning_effort":null},"reviewer":{"model":null,"reasoning_effort":null},"judge":{"model":null,"reasoning_effort":null},"synthesizer":{"model":null,"reasoning_effort":null},"explorer":{"model":null,"reasoning_effort":null},"explainer":{"model":null,"reasoning_effort":null}},"defaults":{"arena":{"candidates":3},"swarm":{"mode":"coverage"},"interrogate":{"reviewers":3},"architect":{"candidates":3},"how":{"explorers":3},"resolve":{"scope":"act-on","rereview":false}}},"source_sha256":"fd46f0cb89e75f99398e48aae807823fbe44e94bd1a084d061aa4021eccfe2fc","built_at":"2026-10-03T21:00:36+00:00"}</script>
 <script>
 "use strict";
 (() => {
@@ -492,6 +492,7 @@ const { issue } = __modules["domain/schema.js"];
 
 const EFFORTS = ["low", "medium", "high", "xhigh", "max", "ultra"];
 const MODES = ["coverage", "first-pass", "rank-all", "best-of"];
+const SCOPES = ["act-on", "act-on-and-consider"];
 
 const PRESENTATION = {
   recall: { title: "Recall", color: "#3b6c96", tint: "#e9f1fa", icon: "↶", short: "Rebuild context and check live state.", output: "context/recall.md", result: "Current-state brief", instruction: "Rebuild recent context for this feature. Reconcile history against the current workspace, and record decisions, gaps, and the next action.", option: "timeWindow", optionLabel: "History window", optionDefault: "Last 14 days" },
@@ -500,6 +501,7 @@ const PRESENTATION = {
   interrogate: { title: "Interrogate", color: "#a14f66", tint: "#fbe9ef", icon: "⌕", short: "Review an artifact and triage findings.", output: "reviews/interrogate.md", result: "Triaged review", instruction: "Freeze the upstream artifact as the review target. Gather independent evidence-backed findings and triage them with reasons. Report a verdict; do not automatically apply fixes.", option: "reviewers", optionLabel: "Reviewer count", optionDefault: 3 },
   architect: { title: "Architect", color: "#5d6097", tint: "#ececfa", icon: "⊞", short: "Settle interfaces before implementation.", output: "design/architecture.md", result: "Interface design", instruction: "Ground the design in the existing system and caller usage. Compare distinct structural options, then settle interfaces, module boundaries, ownership, and rationale.", option: "candidates", optionLabel: "Design candidate count", optionDefault: 3 },
   how: { title: "How", color: "#267b91", tint: "#e2f2f7", icon: "☷", short: "Create a detailed visual HTML explanation.", output: "explainers/how.html", result: "Styled HTML explainer", instruction: "Explain the topic through source evidence, runtime flow, ownership, and boundaries. Produce a detailed, styled standalone HTML page with inline diagrams.", option: "explorers", optionLabel: "Explorer count (broad topics)", optionDefault: 3 },
+  resolve: { title: "Resolve", color: "#4f7a3a", tint: "#ebf4e3", icon: "✓", short: "Fix and verify accepted review findings.", output: "reviews/resolve.md", result: "Resolution ledger", instruction: "Bind the upstream Interrogate report. Reproduce each selected finding, apply the smallest root-cause fix, verify it, and record a per-finding outcome. Do not commit unless asked.", option: "scope", optionLabel: "Finding scope", optionDefault: "act-on" },
 };
 
 function presentation(name, catalog = []) {
@@ -516,7 +518,7 @@ function stepDefaults(skill, catalog = [], defaults = {}) {
   return { skill, label: p.title, instructions: p.instruction, output: p.output, model: "", effort: "", options };
 }
 
-// Per-step catalog-aware issues: effort, participant counts, aggregation mode, history window.
+// Per-step catalog-aware issues: effort, participant counts, aggregation mode, finding scope, history window.
 function optionIssues(step, catalog = []) {
   const out = [], name = step.label || step.id;
   if (step.effort && !EFFORTS.includes(step.effort)) out.push(issue("ready.effort", `${name}: invalid reasoning effort.`, step.id));
@@ -524,10 +526,11 @@ function optionIssues(step, catalog = []) {
   if (["candidates", "reviewers", "explorers"].includes(p.option) && (!Number.isInteger(v) || v < 1 || v > 12 || (p.option === "explorers" && (v < 2 || v > 4))))
     out.push(issue("ready.options", `${name}: invalid participant count.`, step.id));
   if (p.option === "mode" && !MODES.includes(v)) out.push(issue("ready.options", `${name}: choose a supported aggregation mode.`, step.id));
+  if (p.option === "scope" && !SCOPES.includes(v)) out.push(issue("ready.options", `${name}: choose a supported finding scope.`, step.id));
   if (p.option === "timeWindow" && (typeof v !== "string" || !v.trim())) out.push(issue("ready.options", `${name}: set a history window.`, step.id));
   return out;
 }
-return { EFFORTS, MODES, PRESENTATION, presentation, stepDefaults, optionIssues };
+return { EFFORTS, MODES, SCOPES, PRESENTATION, presentation, stepDefaults, optionIssues };
 })();
 __modules["ui/context.js"] = (() => {
 // Shared UI context: the one store/repository/catalog handle plus transient UI state
@@ -1777,7 +1780,7 @@ const { notesSection } = __modules["ui/notes.js"];
 const { deletionPreview } = __modules["store/workspace-store.js"];
 const { executionOrder } = __modules["domain/workflow.js"];
 const { promptIssues } = __modules["prompt/compiler.js"];
-const { EFFORTS, MODES } = __modules["domain/catalog.js"];
+const { EFFORTS, MODES, SCOPES } = __modules["domain/catalog.js"];
 const { slotOf, freeSlots, parseSlot } = __modules["domain/grid.js"];
 const { LIMITS } = __modules["domain/schema.js"];
 
@@ -1875,6 +1878,7 @@ function openStepSheet(id) {
     let from = candidates[0]?.[0] ?? "";
     const optionControl = !p.option ? null
       : p.option === "mode" ? field(p.optionLabel, select("opt", MODES.map(m => [m, m]), s.options.mode, v => update({ options: { ...s.options, mode: v } })))
+      : p.option === "scope" ? field(p.optionLabel, select("opt", SCOPES.map(m => [m, m]), s.options.scope, v => update({ options: { ...s.options, scope: v } })))
       : p.option === "timeWindow" ? field(p.optionLabel, text("opt", s.options.timeWindow ?? "", v => update({ options: { ...s.options, timeWindow: v } })))
       : field(p.optionLabel, text("opt", String(s.options[p.option] ?? ""), v => update({ options: { ...s.options, [p.option]: v.trim() === "" ? "" : Number(v) } }), { inputmode: "numeric" }));
     return h("div", { class: "stack" },

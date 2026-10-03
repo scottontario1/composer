@@ -105,6 +105,9 @@ def read_config(root):
     swarm = defaults.get("swarm")
     if not isinstance(swarm, dict) or not isinstance(swarm.get("mode"), str) or swarm["mode"] not in {"coverage", "first-pass", "rank-all", "best-of"}:
         raise ValueError("Invalid default Swarm mode")
+    resolve = defaults.get("resolve")
+    if not isinstance(resolve, dict) or resolve.get("scope") not in {"act-on", "act-on-and-consider"} or type(resolve.get("rereview")) is not bool:
+        raise ValueError("defaults.resolve requires scope (act-on or act-on-and-consider) and boolean rereview")
     return config
 
 

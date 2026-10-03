@@ -16,6 +16,7 @@
     "swarm": {"mode": "coverage"},
     "interrogate": {"reviewers": 3},
     "architect": {"candidates": 3},
-    "how": {"explorers": 3}
+    "how": {"explorers": 3},
+    "resolve": {"scope": "act-on", "rereview": false}
   }
 }

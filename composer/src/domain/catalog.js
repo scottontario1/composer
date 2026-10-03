@@ -5,6 +5,7 @@ import { issue } from "./schema.js";
 
 export const EFFORTS = ["low", "medium", "high", "xhigh", "max", "ultra"];
 export const MODES = ["coverage", "first-pass", "rank-all", "best-of"];
+export const SCOPES = ["act-on", "act-on-and-consider"];
 
 export const PRESENTATION = {
   recall: { title: "Recall", color: "#3b6c96", tint: "#e9f1fa", icon: "↶", short: "Rebuild context and check live state.", output: "context/recall.md", result: "Current-state brief", instruction: "Rebuild recent context for this feature. Reconcile history against the current workspace, and record decisions, gaps, and the next action.", option: "timeWindow", optionLabel: "History window", optionDefault: "Last 14 days" },
@@ -13,6 +14,7 @@ export const PRESENTATION = {
   interrogate: { title: "Interrogate", color: "#a14f66", tint: "#fbe9ef", icon: "⌕", short: "Review an artifact and triage findings.", output: "reviews/interrogate.md", result: "Triaged review", instruction: "Freeze the upstream artifact as the review target. Gather independent evidence-backed findings and triage them with reasons. Report a verdict; do not automatically apply fixes.", option: "reviewers", optionLabel: "Reviewer count", optionDefault: 3 },
   architect: { title: "Architect", color: "#5d6097", tint: "#ececfa", icon: "⊞", short: "Settle interfaces before implementation.", output: "design/architecture.md", result: "Interface design", instruction: "Ground the design in the existing system and caller usage. Compare distinct structural options, then settle interfaces, module boundaries, ownership, and rationale.", option: "candidates", optionLabel: "Design candidate count", optionDefault: 3 },
   how: { title: "How", color: "#267b91", tint: "#e2f2f7", icon: "☷", short: "Create a detailed visual HTML explanation.", output: "explainers/how.html", result: "Styled HTML explainer", instruction: "Explain the topic through source evidence, runtime flow, ownership, and boundaries. Produce a detailed, styled standalone HTML page with inline diagrams.", option: "explorers", optionLabel: "Explorer count (broad topics)", optionDefault: 3 },
+  resolve: { title: "Resolve", color: "#4f7a3a", tint: "#ebf4e3", icon: "✓", short: "Fix and verify accepted review findings.", output: "reviews/resolve.md", result: "Resolution ledger", instruction: "Bind the upstream Interrogate report. Reproduce each selected finding, apply the smallest root-cause fix, verify it, and record a per-finding outcome. Do not commit unless asked.", option: "scope", optionLabel: "Finding scope", optionDefault: "act-on" },
 };
 
 export function presentation(name, catalog = []) {
@@ -29,7 +31,7 @@ export function stepDefaults(skill, catalog = [], defaults = {}) {
   return { skill, label: p.title, instructions: p.instruction, output: p.output, model: "", effort: "", options };
 }
 
-// Per-step catalog-aware issues: effort, participant counts, aggregation mode, history window.
+// Per-step catalog-aware issues: effort, participant counts, aggregation mode, finding scope, history window.
 export function optionIssues(step, catalog = []) {
   const out = [], name = step.label || step.id;
   if (step.effort && !EFFORTS.includes(step.effort)) out.push(issue("ready.effort", `${name}: invalid reasoning effort.`, step.id));
@@ -37,6 +39,7 @@ export function optionIssues(step, catalog = []) {
   if (["candidates", "reviewers", "explorers"].includes(p.option) && (!Number.isInteger(v) || v < 1 || v > 12 || (p.option === "explorers" && (v < 2 || v > 4))))
     out.push(issue("ready.options", `${name}: invalid participant count.`, step.id));
   if (p.option === "mode" && !MODES.includes(v)) out.push(issue("ready.options", `${name}: choose a supported aggregation mode.`, step.id));
+  if (p.option === "scope" && !SCOPES.includes(v)) out.push(issue("ready.options", `${name}: choose a supported finding scope.`, step.id));
   if (p.option === "timeWindow" && (typeof v !== "string" || !v.trim())) out.push(issue("ready.options", `${name}: set a history window.`, step.id));
   return out;
 }

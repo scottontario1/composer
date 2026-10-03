@@ -10,6 +10,7 @@ Canonical skills live in `skills/<name>/SKILL.md`. Read the relevant skill befor
 | `architect` | Settle interfaces, ownership, and module boundaries before consequential implementation. |
 | `how` | Explain repository mechanics in a detailed, styled, standalone HTML page. |
 | `recall` | Rebuild scoped working context and reconcile past claims with live project state. |
+| `resolve` | Implement and verify accepted Interrogate findings, with a per-finding ledger. |
 
 Explicit requests for these workflows authorize the subagents their instructions describe. For implicit selection, use delegation only when the user has authorized parallel work or the applicable workflow materially benefits from it; otherwise perform a clearly labeled serial version. All workflows remain subject to host permissions and user scope.
 

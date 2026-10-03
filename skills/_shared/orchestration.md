@@ -1,6 +1,6 @@
 # Shared orchestration contract
 
-Read this once when starting Arena, Swarm, Interrogate, or Architect. It defines local conventions, not an LLM API implementation.
+Read this once when starting Arena, Swarm, Interrogate, Architect, or Resolve. It defines local conventions, not an LLM API implementation.
 
 ## Configure and bind the host
 
