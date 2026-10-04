@@ -10,7 +10,7 @@
 </head>
 <body>
 <main>
-<header class="page-head"><h1>Composer · Skill playground</h1><p>Drag skills. Snap them into place. Make it yours.</p></header>
+<header class="page-head"><h1>Composer · Skill playground</h1><p>Lock skills together. Build stacks. Nest parallel work.</p></header>
 <div id="board" class="board-host">
 <div class="fallback"><strong>Skill composition</strong><p>If the decorative preview is unavailable, use the skill buttons below to read the full instructions.</p></div>
 </div>
@@ -28,7 +28,8 @@
 </nav>
 <article class="doc-sheet" aria-labelledby="document-title"><h3 id="document-title">Arena</h3><pre class="doc-body" id="document-body">The full Arena instructions will appear here when the canonical skill packet is included.</pre><p id="document-note" class="doc-note">Full canonical instructions are provided by the bundled skill packet.</p></article>
 </section>
-<p class="footer" id="storage-note">Your arrangement saves in this browser. Swarm slices configure this board preview.</p><p class="footer"><a href="reference.html">View the original ornate composition</a></p>
+<section class="selected-summary" aria-label="Composition rules"><h2>Connected composition</h2><p>Top-to-bottom connections define composition order. Separate stacks have no ordering relationship. Each container holds parallel lanes; the pieces in each lane are sequential. Drag a lane’s middle piece to take it and every following piece, including its nested work. Moving a stack to the tray returns all its pieces. The canvas may pan on phones so parallel lanes stay readable. This page saves composition structure but does not launch agents or generate prompts.</p><p><code>attach(skill, {after: otherSkill})</code>, <code>attach(skill, {inside: containerSkill})</code>, or <code>attach(skill, {at: {x, y}})</code> compose the same tree as dragging. Snapshots contain <code>stacks: [{x, y, items: [{skill, children: [{items: [...]}]}]}]</code>; children are parallel lanes. Older saved slots migrate, in order, into one stack at the origin.</p></section>
+<p class="footer" id="storage-note">Your arrangement saves in this browser. Swarm slices configure this board preview.</p><p class="footer"><a href="../archive/native-reference/reference.html">View the original ornate composition</a></p>
 </main>
 <script id="skill-docs" type="application/json">{}</script>
 <script>
@@ -71,6 +72,8 @@ try{
     try{localStorage.setItem('composer.enamel.playground.v1',JSON.stringify(state));}catch(error){document.getElementById('storage-note').textContent='This browser cannot save the board. It will last for this visit.';}
   }});
   window.showSkillDocument(window.skillBoard.snapshot().selected);
+  // Persist normalization/migration immediately, including before the first edit.
+  try{localStorage.setItem('composer.enamel.playground.v1',JSON.stringify(window.skillBoard.snapshot()));}catch(error){document.getElementById('storage-note').textContent='This browser cannot save the board. It will last for this visit.';}
   fallback?.remove();
 }catch(error){
   const fallback=host.querySelector('.fallback');

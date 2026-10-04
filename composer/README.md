@@ -1,71 +1,46 @@
-# Composer
+# Ornate skill playground
 
-One offline workspace for working out a problem and doing the work: **Overview**, **Skills**, and **Loops**, on a shared board. It is a single HTML file with no server, install, or network use.
+Open `index.html` directly, or host it as a static page. It is a standalone, offline HTML file with native SVG artwork and full instructions for the seven skills shown on the board. There are no runtime dependencies, iframes, Three.js, or Canvas requirements.
 
-## Open it
+Drag a skill from the tray onto one of eight sockets. On a wide canvas the sockets fill four columns; they scan left to right across each row, then continue on the next. Medium widths use three or two columns, and phone layouts turn the sockets into one horizontally scrollable row so slots 1–8 keep their left-to-right order. On a phone, drag the 44px ⠿ handle; the card body remains available for normal scrolling. A floating ornate piece snaps into the highlighted socket before release. Dropping onto an occupied socket swaps the pieces; a displaced tray-to-board piece returns to the tray. Dropping outside the board, Escape, or pointer cancellation keeps placement unchanged. Dragging near the viewport edges scrolls the page.
 
-Open [index.html](index.html) in a current browser. Everything it needs is embedded, so you can copy the file to another device. On a phone, open it in a browser that runs HTML rather than a file manager's static preview.
+For a tap or keyboard alternative, pick up a piece with its handle and choose a numbered slot. Undo retains up to 40 board changes; Reset clears the board and can itself be undone. Return to tray removes the selected piece from its socket. The page saves placement and counts to browser storage when available. Read instructions opens the selected skill's full description without selection or dragging jumping the page.
 
-## The three views
+`../archive/native-reference/reference.html` preserves the previous six-skill reference composition byte-for-byte. The comparison page now uses that archived composition so its original native/Three.js visual comparison remains valid. The preserved Three.js version is at `../archive/three-ui/index.html`. The former Overview/Skills/Loops app is at `../archive/workspace/composer/index.html`.
 
-| View | What it is for |
-| --- | --- |
-| **Overview** | Your brief, the concepts you are exploring next to the work addressing them, readiness, the board, and notes. |
-| **Skills** | The executable workflow: steps in run order, each waiting on the artifacts it needs. Produces the agent prompt. |
-| **Loops** | The causal map: concepts with signed, optionally delayed relations, and a list of the feedback loops they form. |
+## Component API
 
-The two domains stay separate:
+```js
+import { createSkillPlayground } from './src/components.js';
 
-- A **handoff** (Skills) means "wait for this artifact".
-- A **causal relation** (Loops) means "this concept may influence that one". It never schedules work.
-- A **relation to work** connects a step and a concept for navigation, and optionally adds context to the prompt. It never creates a handoff or a causal link.
+const game = createSkillPlayground(host, {
+  selected: 'arena', slices: 3, reviewers: 3,
+  slots: ['recall', 'architect', null, null, null, null, null, null],
+  onChange(state, { reason }) { saveOrPreview(state, reason); }
+});
+game.snapshot(); // { selected, slices, reviewers, slots: [8 entries] }
+game.place('arena', 2); // zero-based socket; swaps if occupied
+// Also available: select(skill), undo(), reset(), panels, element, dispose().
+```
 
-Every connection is made through a labeled form: *Needs evidence from*, *Add causal relation*, *Relate to concept / work*. Nothing is connected because two pieces sit near each other.
+Slots normalize to eight unique, known skill names or null. Snapshots own their copied slot array. Reset restores the configured initial selection/counts and an empty board; undo restores the previous snapshot. The host owns persistence; the standalone page supplies its own browser-storage adapter. A failure to access storage leaves an interactive board and reports that changes last for this visit.
 
-## The board
+The existing `createSkillPanel` and static `createSkillBoard` factories remain available. Panels own their ResizeObserver, SVG definition IDs, and count controls. The playground mounts one root; event handlers use its AbortController. Disposal cancels active dragging and animation frames, disconnects panel observers, and preserves unrelated host children. DOM text remains semantic and user strings render through `textContent`.
 
-Skills and concepts each occupy one named slot (`r03c07`) on a bounded grid (12×12 to start, up to 24×24). Tap a piece, then **Open**, **Move…**, or **Take off board**. Moving or swapping a piece changes only where it sits; it never changes handoffs, relations, notes, or run order. Run order is the handoff graph first, then your saved "prefer earlier/later" order for steps that are ready together. Nothing needs dragging.
+## App boundary
 
-## Notes
-
-Notes attach to the workspace, a step, or a concept. They hold evidence and decisions and never change instructions or dependencies. Agent suggestions are added under **Save / share → Agent suggestion** as separate *proposals* with their source; they cannot overwrite your notes. Nothing reaches the prompt unless you tick it in the prompt dialog.
-
-## Reusable workflows
-
-Select steps and **Save steps as reusable workflow** to keep a frozen copy of them and their internal handoffs. Inserting one adds fresh, editable steps with namespaced output paths. It is not a new skill, and later edits never update earlier uses.
-
-## Prompt
-
-**Get agent prompt** (Skills) validates the workflow and builds a prompt for an agent working in the intended project. Optional analytical context (relations you marked *Include in prompt*, plus notes you tick) is shown verbatim, labeled as your hypotheses, capped at 20,000 characters, and frozen until you refresh it.
-
-## Saving
-
-Work saves in browser storage and shows its status in the header. Export a copy to keep or move your work: **Save / share** offers the whole workspace as JSON, selected notes as Markdown, and the earlier workflow-only and loop-only formats. Imports show what will change first and can be undone.
-
-- Earlier drafts (`orch.skill-composer.v1`, `orch.loop-map.v1`) are offered for import on first open. They are never modified, and run order is preserved.
-- An unreadable or newer-version saved workspace is protected and never overwritten without an explicit choice. A second window that changed the workspace pauses saving until you pick a version.
+This is the playable ornate UI. It does not import the main Composer store, generate an execution prompt, or launch agents. Placement is a visual arrangement, not run order or a workflow handoff. Swarm slices are preview state; the canonical Swarm option remains mode. Interrogate reviewers can be mapped to options.reviewers when integrated into the main app's command layer.
 
 ## Build
 
-The standalone file is generated from the sources in [src/](src/). From the repository root:
-
 ```bash
-python scripts/build_composer.py           # bundle sources, embed the validated skill catalog
-python scripts/build_composer.py --check   # confirm index.html is current
-cd composer/src && node --test test/*.test.js   # domain, store, and I/O tests
+python scripts/build_composer.py
 ```
 
-Python is needed only for this authoring step. See [src/README.md](src/README.md) for the module map and the rules the code enforces.
+Edit `src/components.js` and `src/index.html`. The Python-only builder embeds the component module and exact current seven SKILL.md texts in safely escaped JSON. Documentation initializes independently of the decorative board. The preserved `../archive/native-reference/reference.html` is an archival artifact and is not regenerated.
 
-| Location | Purpose |
-| --- | --- |
-| [index.html](index.html) | Generated standalone app. Do not edit by hand. |
-| [src/shell.html](src/shell.html), [src/ui/](src/ui/) | Page shell, stylesheet, and views. |
-| [src/domain/](src/domain/), [src/store/](src/store/), [src/io/](src/io/), [src/prompt/](src/prompt/) | Pure rules, the single workspace store, storage and transfer adapters, prompt compiler. |
-| [../scripts/bundle_composer.py](../scripts/bundle_composer.py) | Inlines the ES modules into one script. |
-| [../scripts/build_composer.py](../scripts/build_composer.py) | Validates skills and embeds the catalog packet. |
-| [../skills/](../skills/) | Canonical skill instructions. |
+## Verification
 
-## Limits
+Playwright with installed Chrome verified the delivered file at 320px, 390px, and 1440px: pointer/touch drag, pre-release snapping, tap swaps, keyboard placement, undo, reset/undo, return to tray, reload persistence, outside release, pointer cancellation, mobile tray swipes, viewport edge scrolling, counter controls, unique SVG IDs during a drag, cleanup, and exact seven-document embedding. Enabled game buttons and document buttons measured at least 44×44px. No page errors or horizontal document overflow were observed at these widths. Browser emulation does not replace physical iOS Safari or Android device testing.
 
-Up to 100 steps / 300 handoffs, 60 concepts / 150 relations, 300 notes (20,000 bytes each), 300 relations to work, 20 reusable workflows, and an 8 MiB workspace. These are starting policies, not measured browser limits; browser storage may be smaller. Touch targets, the phone layout, and offline direct-file use were checked in an embedded browser pane only, not on physical devices or in every browser.
+Original arena decisions and the native-versus-Three.js assessment remain in `../archive/native-reference/arena-report.md` and `../archive/native-reference/judge.md`; they describe the archived reference composition, not a performance evaluation of the new drag interaction.

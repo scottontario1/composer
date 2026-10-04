@@ -64,7 +64,7 @@ Update the routing table in `AGENTS.md` and this catalog when a new skill is int
 
 ## Configure a run
 
-Use the [visual composer](composer.md) to place skills on a grid, connect artifact handoffs, edit step settings, and export a prompt for explicit invocation. Open the self-contained `composer/index.html` directly in a browser; no server is needed. After catalog, configuration, or editor changes, refresh its embedded snapshot with `python scripts/build_composer.py`. The composer does not launch models; the agent executes the exported plan.
+Use the [ornate Composer](composer.md) to arrange skill pieces visually and read their instructions. Open the self-contained `composer/index.html` directly in a browser; no server is needed. It does not launch models or establish workflow handoffs. The older workflow-prompt editor is preserved in [the archive](../archive/README.md). After skill or editor changes, refresh the active page with `python scripts/build_composer.py`.
 
 Edit `orchestration.json` for persistent defaults. Null model and effort values inherit the host. Use actual runtime-supported identifiers for explicit choices. For example, a user who wants Luna workers at medium reasoning can set the worker role to:
 

@@ -44,9 +44,13 @@ open composer/index.html                             # macOS
 Start-Process (Resolve-Path .\composer\index.html)    # PowerShell on Windows
 ```
 
-Use **Overview** to shape the brief and workspace, **Skills** to arrange workflow steps and handoffs, and **Loops** to map causal relations. In Skills, choose **Get agent prompt**, then copy or download the prompt and give it to an agent in the intended project. Composer prepares a workflow; it does not launch agents or execute the prompt. Workspaces save in browser storage, so export a copy when moving to another browser or device. On a phone, use a browser that executes HTML rather than a file manager's static preview.
+Drag a skill by its ⠿ handle from the tray onto a numbered board slot, or tap the handle and then a slot. Pieces snap into place; dropping onto an occupied slot swaps them. On a phone, swipe the board sideways to arrange slots from left to right. Use Undo, Reset board, and Return to tray to adjust the arrangement, and Read instructions to open the selected skill's full description. Placement saves in this browser; it is a visual arrangement and does not execute agents or define workflow dependencies.
 
-For source files, build instructions, and workflow details, see [`composer/README.md`](composer/README.md). After changing a skill, its references, `orchestration.json`, or the Composer editor, refresh the embedded catalog with `python scripts/build_composer.py` and verify it with `python scripts/build_composer.py --check`.
+The active source is in [`composer/src/`](composer/src/). See [`composer/README.md`](composer/README.md) for component APIs and verification limits. Rebuild the standalone page with `python scripts/build_composer.py`, and check freshness with `python scripts/build_composer.py --check`.
+
+## Archived versions
+
+Past UIs live under [`archive/`](archive/README.md): the former Overview/Skills/Loops workspace, the Three.js showcase, and the original static native composition. The active ornate drag-and-drop app is always `composer/index.html`. The older `composer/native-ui/index.html` URL redirects to it.
 
 ## Project skills
 

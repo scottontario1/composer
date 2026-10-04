@@ -1,105 +1,66 @@
 #!/usr/bin/env python3
-"""Build the standalone composer: bundle sources and embed the validated skill catalog."""
+"""Inline dependency-free native skill components and exact canonical skill documents."""
 import argparse
-from datetime import datetime, timezone
-import hashlib
 import json
 from pathlib import Path
 import re
-import sys
-import tempfile
 
-from bundle_composer import render_template
-from skills import check, read_config, validate_skill
+from skills import check
 
-PACKET = re.compile(r'(<script id="orch-bundle" type="application/json">)(.*?)(</script>)', re.S)
-ROOT = Path(__file__).resolve().parents[1]
+NAMES = ('recall', 'architect', 'arena', 'swarm', 'interrogate', 'how', 'resolve')
 
+def render(root):
+    root = Path(root).resolve()
+    check(root)
+    base = root / 'composer'
+    source = base / 'src'
+    html = (source / 'index.html').read_text()
+    code = (source / 'components.js').read_text()
+    if re.search(r'^\s*import\b', code, re.M):
+        raise ValueError('Component source must not depend on external modules')
+    exports = re.findall(r'^\s*export\s+(?:async\s+)?(?:function|class|const|let)\s+(\w+)', code, re.M)
+    exports += [n.strip() for group in re.findall(r'^\s*export\s*\{([^}]+)\};?', code, re.M) for n in group.split(',')]
+    if not exports or any(' ' in n for n in exports):
+        raise ValueError('Expected simple named component exports')
+    code = re.sub(r'^\s*export\s*\{[^}]+\};?', '', code, flags=re.M)
+    code = re.sub(r'^([ \t]*)export\s+', r'\1', code, flags=re.M)
+    docs = {name: (root / 'skills' / name / 'SKILL.md').read_text() for name in NAMES}
+    packet = json.dumps(docs, ensure_ascii=False).replace('<','\\u003c').replace('>','\\u003e').replace('&','\\u0026')
+    html, count = re.subn(r'(<script id="skill-docs" type="application/json">).*?(</script>)',lambda m:m[1]+packet+m[2],html,flags=re.S)
+    if count != 1:
+        raise ValueError('Expected one skill-docs packet')
+    pattern = re.compile(r'(<script\s+type="module"[^>]*>)(.*?)(</script>)', re.S)
+    modules = pattern.findall(html)
+    if len(modules)!=1:
+        raise ValueError('Expected one inline module entry')
+    entry=modules[0][1]
+    def bind(match):
+        names = match[1].replace(' as ', ': ')
+        return 'const {'+names+'} = __components;'
+    entry,count=re.subn(r"import\s*\{([^}]+)\}\s*from\s*['\"]\./components\.js['\"];?",bind,entry,flags=re.S)
+    if count!=1 or re.search(r'\bimport\s*(?:\(|\{|\*)',entry):
+        raise ValueError('Expected exactly one named import from ./components.js')
+    bundle='const __components = (() => {\n'+code+'\nreturn {'+', '.join(dict.fromkeys(exports))+'};\n})();\n'+entry
+    bundle=bundle.replace('</script','<\\/script')
+    html=pattern.sub(lambda m:m[1]+'\n'+bundle+'\n'+m[3],html)
+    return html
 
-def canonical_packet(root, template):
-    paths = check(root)
-    data = {
-        "version": 1,
-        "skills": [
-            {**validate_skill(path), "path": f"skills/{path.name}/SKILL.md"}
-            for path in paths
-        ],
-        "config": read_config(root),
-    }
-    # All instruction/reference bytes participate; the digest is provenance,
-    # not an authenticity check or a guarantee that a local copy is current.
-    sources = {
-        path.relative_to(root).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
-        for path in sorted((root / "skills").rglob("*"))
-        if path.is_file()
-    }
-    skeleton = PACKET.sub(lambda match: match[1] + "__CATALOG__" + match[3], template)
-    fingerprint = {
-        "catalog": data,
-        "skill_sources": sources,
-        "template_sha256": hashlib.sha256(skeleton.encode()).hexdigest(),
-    }
-    data["source_sha256"] = hashlib.sha256(
-        json.dumps(fingerprint, sort_keys=True, ensure_ascii=False).encode()
-    ).hexdigest()
-    return data
+def build(root, output=None, check=False):
+    dest = Path(output) if output else Path(root) / 'composer' / 'index.html'
+    html = render(root)
+    if check:
+        if not dest.exists() or dest.read_text() != html:
+            raise SystemExit('Stale Composer: run python scripts/build_composer.py')
+        print('Current: ' + str(dest))
+        return
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(html)
+    print(str(dest) + ' (' + str(dest.stat().st_size) + ' bytes; no third-party runtime)')
 
-
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", type=Path, default=ROOT)
-    parser.add_argument("--output", type=Path, help="Write another portable HTML copy")
-    parser.add_argument("--check", action="store_true", help="Inspect snapshot freshness without writing")
-    args = parser.parse_args()
-    root = args.root.expanduser().resolve()
-    default_output = root / "composer" / "index.html"
-    output = args.output.expanduser().resolve() if args.output else default_output
-    temporary = None
-    try:
-        template = render_template(root)
-        if len(PACKET.findall(template)) != 1:
-            raise ValueError("Composer needs exactly one orch-bundle JSON packet")
-        data = canonical_packet(root, template)
-        if args.check:
-            text = output.read_text(encoding="utf-8").replace("\r\n", "\n")
-            matches = list(PACKET.finditer(text))
-            if len(matches) != 1:
-                raise ValueError("Output needs exactly one embedded catalog packet")
-            embedded = json.loads(matches[0][2])
-            built_at = embedded.pop("built_at", None)
-            if not isinstance(built_at, str):
-                raise ValueError("Catalog build date is missing")
-            datetime.fromisoformat(built_at)
-            if embedded != data:
-                raise ValueError("Composer snapshot is stale; run scripts/build_composer.py")
-            # Also require the checked copy to carry the current editor source.
-            if PACKET.sub("__CATALOG__", text) != PACKET.sub("__CATALOG__", template):
-                raise ValueError("Portable copy has a different editor; rebuild it")
-            print(f"Current: {len(data['skills'])} canonical skills, config, references, and editor")
-            return 0
-        data["built_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
-        payload = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
-        payload = payload.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
-        rendered = PACKET.sub(lambda match: match[1] + payload + match[3], template)
-        output.parent.mkdir(parents=True, exist_ok=True)
-        with tempfile.NamedTemporaryFile(
-            "w", encoding="utf-8", newline="\n", dir=output.parent, delete=False
-        ) as handle:
-            temporary = Path(handle.name)
-            handle.write(rendered)
-        temporary.chmod(default_output.stat().st_mode & 0o777 if default_output.exists() else 0o644)
-        temporary.replace(output)
-        temporary = None
-        print(f"Standalone composer: {output} ({len(data['skills'])} validated skills)")
-        return 0
-    except (OSError, ValueError, TypeError) as exc:
-        print(f"Cannot refresh the standalone composer: {exc}", file=sys.stderr)
-        return 1
-    finally:
-        if temporary is not None:
-            temporary.unlink(missing_ok=True)
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
-
+if __name__=='__main__':
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--root',type=Path,default=Path(__file__).resolve().parents[1])
+    parser.add_argument('--output',type=Path)
+    parser.add_argument('--check', action='store_true', help='Check freshness without writing')
+    args=parser.parse_args()
+    build(args.root,args.output,args.check)
