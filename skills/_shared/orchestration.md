@@ -19,6 +19,10 @@ In Codex sessions with collaboration tools, use `spawn_agent`, completion messag
 
 Treat configured concurrency as a ceiling on active delegates, reduced to the host's available slots. It is separate from total task count. Refill as results arrive. Judge after candidates complete; nested workflows share the same ceiling. Do not create a fleet just to meet a default count.
 
+## Choose economical delegate models
+
+For bounded coordination work such as repository exploration, coverage checks, and straightforward candidate drafts, prefer a smaller, faster worker model (for example Luna or Sonnet) when the host offers it. Check the configured `worker` or `explorer` role and use only model identifiers supported by the current host. Keep synthesis, difficult design judgment, and review with the parent or a stronger model when the task warrants it. Do not spawn extra agents solely to reduce model cost, and do not change persistent model defaults for one run.
+
 ## Run artifacts
 
 From the project root, allocate a run with:
