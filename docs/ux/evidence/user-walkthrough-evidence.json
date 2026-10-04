@@ -1,0 +1,228 @@
+{
+  "phone": {
+    "entry": {
+      "scrollY": 0,
+      "selected": "Arena",
+      "announcement": "Drag a skill by its ⠿ handle onto a socket. Or tap the handle, then tap a slot.",
+      "top": 211,
+      "slots": [
+        {
+          "label": "Slot 1: empty"
+        },
+        {
+          "label": "Slot 2: empty"
+        },
+        {
+          "label": "Slot 3: empty"
+        }
+      ],
+      "tray": [
+        "Recall",
+        "Architect",
+        "Arena",
+        "Swarm",
+        "Interrogate",
+        "How",
+        "Resolve"
+      ]
+    },
+    "afterRecall": {
+      "scrollY": 0,
+      "selected": "Recall",
+      "announcement": "Recall snapped to slot 1.",
+      "top": 211,
+      "slots": [
+        {
+          "label": "Slot 1: Recall",
+          "skill": "Recall"
+        },
+        {
+          "label": "Slot 2: empty"
+        },
+        {
+          "label": "Slot 3: empty"
+        }
+      ],
+      "tray": [
+        "Architect",
+        "Arena",
+        "Swarm",
+        "Interrogate",
+        "How",
+        "Resolve"
+      ]
+    },
+    "afterTraySwipe": {
+      "scrollLeft": 518,
+      "visible": [
+        "Architect",
+        "Arena",
+        "Swarm",
+        "Interrogate",
+        "How",
+        "Resolve"
+      ]
+    },
+    "afterSwap": {
+      "scrollY": 0,
+      "selected": "Architect",
+      "announcement": "Architect snapped to slot 1. Recall returned to the tray.",
+      "top": 211,
+      "slots": [
+        {
+          "label": "Slot 1: Architect",
+          "skill": "Architect"
+        },
+        {
+          "label": "Slot 2: empty"
+        },
+        {
+          "label": "Slot 3: empty"
+        }
+      ],
+      "tray": [
+        "Arena",
+        "Swarm",
+        "Interrogate",
+        "How",
+        "Resolve",
+        "Recall"
+      ]
+    },
+    "instructions": {
+      "heading": "Architect",
+      "body": "---\nname: \"architect\"\ndescription: \"Settle caller-facing interfaces, data shapes, ownership, and module boundaries through competi",
+      "scrollY": 2717
+    },
+    "errors": []
+  },
+  "keyboard": {
+    "focusTrace": [
+      {
+        "i": "BUTTON",
+        "label": "Reset board",
+        "className": ""
+      },
+      {
+        "i": "A",
+        "label": "Read instructions",
+        "className": ""
+      },
+      {
+        "i": "DIV",
+        "label": "Available skills",
+        "className": "skill-tray"
+      },
+      {
+        "i": "BUTTON",
+        "label": "Recall Retrieve relevant context",
+        "className": "enamel-select"
+      },
+      {
+        "i": "BUTTON",
+        "label": "Drag or pick up Recall",
+        "className": "skill-grip"
+      },
+      {
+        "i": "after-pickup",
+        "label": "Architect\nDefine interfaces",
+        "className": "enamel-select"
+      },
+      {
+        "i": "after-pickup",
+        "label": "Drag or pick up Architect",
+        "className": "skill-grip"
+      },
+      {
+        "i": "after-pickup",
+        "label": "Arena\nCompete candidate solutions",
+        "className": "enamel-select"
+      },
+      {
+        "i": "after-pickup",
+        "label": "Drag or pick up Arena",
+        "className": "skill-grip"
+      },
+      {
+        "i": "after-pickup",
+        "label": "Swarm\nWork in parallel slices",
+        "className": "enamel-select"
+      },
+      {
+        "i": "after-pickup",
+        "label": "Fewer slices",
+        "className": "enamel-step"
+      },
+      {
+        "i": "after-pickup",
+        "label": "Swarm slices",
+        "className": ""
+      },
+      {
+        "i": "after-pickup",
+        "label": "More slices",
+        "className": "enamel-step"
+      },
+      {
+        "i": "after-pickup",
+        "label": "Drag or pick up Swarm",
+        "className": "skill-grip"
+      },
+      {
+        "i": "after-pickup",
+        "label": "Interrogate\nReview and triage",
+        "className": "enamel-select"
+      },
+      {
+        "i": "after-pickup",
+        "label": "Fewer reviewers",
+        "className": "enamel-step"
+      },
+      {
+        "i": "after-pickup",
+        "label": "Interrogate reviewers",
+        "className": ""
+      },
+      {
+        "i": "after-pickup",
+        "label": "More reviewers",
+        "className": "enamel-step"
+      },
+      {
+        "i": "after-pickup",
+        "label": "Drag or pick up Interrogate",
+        "className": "skill-grip"
+      },
+      {
+        "i": "after-pickup",
+        "label": "How\nExplain with HTML",
+        "className": "enamel-select"
+      },
+      {
+        "i": "after-pickup",
+        "label": "Drag or pick up How",
+        "className": "skill-grip"
+      },
+      {
+        "i": "after-pickup",
+        "label": "Resolve\nImplement verified fixes",
+        "className": "enamel-select"
+      },
+      {
+        "i": "after-pickup",
+        "label": "Drag or pick up Resolve",
+        "className": "skill-grip"
+      },
+      {
+        "i": "after-pickup",
+        "label": "Slot 1: empty, place or swap here",
+        "className": "socket-label"
+      }
+    ],
+    "picked": "Recall picked up. Tap a slot to place it; an occupied slot swaps pieces.",
+    "slotOneReached": true,
+    "selectedAfterTabWalk": "Interrogate",
+    "focusTabsAfterPickup": 19,
+    "errors": []
+  }
+}

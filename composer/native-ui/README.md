@@ -1,57 +1,46 @@
-# Native Composer skill components
+# Ornate skill playground
 
-Open `index.html` directly. It is an offline HTML file containing browser-native HTML/CSS/SVG, reusable component code, and all six full canonical skill documents. No runtime library, images, fonts, server, Canvas or WebGL is required. `../three-ui/index.html` preserves the earlier Three.js version; `../ui-comparison.html` lets you switch between them.
+Open `index.html` directly, or host it as a static page. It is a standalone, offline HTML file with native SVG artwork and full instructions for all seven canonical skills. There are no runtime dependencies, iframes, Three.js, or Canvas requirements.
 
-The reference is recreated with precise puzzle silhouettes, multi-line weathered brass rims, thin leaf/flower engraving, clipped procedural mineral patina, native icons and semantic HTML text/controls. Desktop retains Arena/Swarm nested inside Architect. Narrow hosts stack them while retaining icon proportions and access to all controls. The selected skill summary and complete instructions follow selection, reset and API updates.
+Drag a skill from the tray onto one of eight sockets. On a wide canvas the sockets fill four columns; they scan left to right across each row, then continue on the next. Medium widths use three or two columns, and phone layouts turn the sockets into one horizontally scrollable row so slots 1–8 keep their left-to-right order. On a phone, drag the 44px ⠿ handle; the card body remains available for normal scrolling. A floating ornate piece snaps into the highlighted socket before release. Dropping onto an occupied socket swaps the pieces; a displaced tray-to-board piece returns to the tray. Dropping outside the board, Escape, or pointer cancellation keeps placement unchanged. Dragging near the viewport edges scrolls the page.
 
-## Reuse
+For a tap or keyboard alternative, pick up a piece with its handle and choose a numbered slot. Undo retains up to 40 board changes; Reset clears the board and can itself be undone. Return to tray removes the selected piece from its socket. The page saves placement and counts to browser storage when available. Read instructions opens the selected skill's full description without selection or dragging jumping the page.
+
+`reference.html` preserves the previous six-skill reference composition byte-for-byte. The comparison page now uses that archived composition so its original native/Three.js visual comparison remains valid. The preserved Three.js version remains unchanged.
+
+## Component API
 
 ```js
-import { createSkillBoard, createSkillPanel, SKILLS } from './src/components.js';
+import { createSkillPlayground } from './src/components.js';
 
-const board = createSkillBoard(host, {
+const game = createSkillPlayground(host, {
   selected: 'arena', slices: 3, reviewers: 3,
-  onChange(state, { reason }) { updateHostPreview(state, reason); }
+  slots: ['recall', 'architect', null, null, null, null, null, null],
+  onChange(state, { reason }) { saveOrPreview(state, reason); }
 });
-board.select('swarm');
-board.update({ selected:'swarm', slices:5, reviewers:4 });
-board.updatePanel('arena', { title:'Arena', subtitle:'Compare implementations' });
-board.getState(); // copied { selected, slices, reviewers }
-board.snapshot(); // equivalent
-board.reset(); // normalized initial selection and counts
-board.resize(); // automatic ResizeObserver also tracks host size
-board.dispose(); // idempotent; preserves unrelated host nodes
-
-const panel = createSkillPanel({
-  skill:'recall', title:'Recall', subtitle:'Retrieve relevant context'
-}, { onSelect(skill, state) { showSkill(skill, state); } });
-host.append(panel); // an HTMLElement with a small component API
-panel.update({ title:'Project context', selected:true });
-panel.snapshot();
-panel.resize();
-panel.dispose();
+game.snapshot(); // { selected, slices, reviewers, slots: [8 entries] }
+game.place('arena', 2); // zero-based socket; swaps if occupied
+// Also available: select(skill), undo(), reset(), panels, element, dispose().
 ```
 
-`createSkillPanel` returns an independently semantic DOM panel with its selection button, SVG frame, separate icon and (for Swarm/Interrogate) native numeric input. Skill identity selects the canonical silhouette/palette; caller title/subtitle strings are rendered through `textContent`. Numeric inputs round and clamp to integers 1–12; blanks/nonfinite values preserve the prior count. Panel `onCount(value, skill)` is available for standalone use. New definition IDs are assigned per instance, and each panel redraws its own frame at actual dimensions so resizing does not stretch icons or engraved paths. Native inputs/buttons are retained during redraw, preserving focus.
+Slots normalize to eight unique, known skill names or null. Snapshots own their copied slot array. Reset restores the configured initial selection/counts and an empty board; undo restores the previous snapshot. The host owns persistence; the standalone page supplies its own browser-storage adapter. A failure to access storage leaves an interactive board and reports that changes last for this visit.
 
-Boards append one owned root to the host. Their styles, listeners and resize observers are released on disposal. Multiple boards have independent state and SVG IDs. Callbacks receive fresh consistent snapshots and a reason (`selection`, `count`, `update`, or `reset`). `updatePanel` accepts title/subtitle only, keeping presentation edits separate from board state. Container queries adapt to the host width, including a 390px embedded host on a wide desktop. Rendering is event driven with no continuous animation or pointer effects. Reduced motion is respected, and selection/focus are visible. The exposed `panels` Map offers inspection; use `updatePanel` for presentation and board `update` for counts/selection to keep state consistent.
+The existing `createSkillPanel` and static `createSkillBoard` factories remain available. Panels own their ResizeObserver, SVG definition IDs, and count controls. The playground mounts one root; event handlers use its AbortController. Disposal cancels active dragging and animation frames, disconnects panel observers, and preserves unrelated host children. DOM text remains semantic and user strings render through `textContent`.
 
-## Existing app boundary
+## App boundary
 
-This showcase imports no app stores or execution modules. The host owns persistence. Canonical Composer steps use `{skill,label,instructions,output,model,effort,options}`; map reviewers to `options.reviewers` through the existing step-update command while retaining other options. Current Swarm options expose `mode`. Slices remain preview state until slice planning is expressed in instructions or an explicit schema change is settled. No control launches agents.
+This is the playable ornate UI. It does not import the main Composer store, generate an execution prompt, or launch agents. Placement is a visual arrangement, not run order or a workflow handoff. Swarm slices are preview state; the canonical Swarm option remains mode. Interrogate reviewers can be mapped to options.reviewers when integrated into the main app's command layer.
 
 ## Build
-
-From the repository root:
 
 ```bash
 python composer/native-ui/build.py
 ```
 
-The small Python builder inlines the dependency-free named component exports and the page entry module, then embeds exact current canonical SKILL.md texts as safely escaped JSON. It needs Python only. Edit `src/index.html` or `src/components.js` and rebuild. The source template intentionally has an empty packet; the delivered `index.html` contains all six complete documents. The classic documentation reader runs independently of the decorative module, so instructions remain available if preview initialization fails.
+Edit `src/components.js` and `src/index.html`. The Python-only builder embeds the component module and exact current seven SKILL.md texts in safely escaped JSON. Documentation initializes independently of the decorative board. The preserved `reference.html` is an archival artifact and is not regenerated.
 
-## Arena and limits
+## Verification
 
-Three independent candidates and an inherited same-model judge produced this C-based synthesis. B supplied stepped contours and the patina approach. Original candidates survive in `.orch/runs/20261003T205221Z-svg-enamel-ui-27831413/`. See `arena-report.md` and `judge.md` for the comparison, decisions and evidence.
+Playwright with installed Chrome verified the delivered file at 320px, 390px, and 1440px: pointer/touch drag, pre-release snapping, tap swaps, keyboard placement, undo, reset/undo, return to tray, reload persistence, outside release, pointer cancellation, mobile tray swipes, viewport edge scrolling, counter controls, unique SVG IDs during a drag, cleanup, and exact seven-document embedding. Enabled game buttons and document buttons measured at least 44×44px. No page errors or horizontal document overflow were observed at these widths. Browser emulation does not replace physical iOS Safari or Android device testing.
 
-Inspected desktop, 390px mobile, native selection/count/reset/keyboard controls, exact six-document rendering, configured reset callbacks, multiple instances, SVG ID uniqueness, literal caller text, narrow embedded hosts, cleanup and documentation with the preview unavailable. No automated test suite was run. Native SVG filtering still has rendering cost; recorded local timings are observations rather than a hardware-independent performance benchmark. Material weathering and engraving approximate the reference photograph.
+Original arena decisions and the native-versus-Three.js assessment remain in `arena-report.md` and `judge.md`; they describe the archived reference composition, not a performance evaluation of the new drag interaction.

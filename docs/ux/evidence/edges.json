@@ -1,0 +1,40 @@
+{
+  "preview": {
+    "target": "0",
+    "ghost": {
+      "x": 24,
+      "y": 622,
+      "width": 325.390625,
+      "height": 174,
+      "top": 622,
+      "right": 349.390625,
+      "bottom": 796,
+      "left": 24
+    },
+    "slot": {
+      "x": 19,
+      "y": 573,
+      "width": 335.390625,
+      "height": 230,
+      "top": 573,
+      "right": 354.390625,
+      "bottom": 803,
+      "left": 19
+    },
+    "duplicates": []
+  },
+  "edgeScroll": {
+    "beforeY": 0,
+    "afterY": 420
+  },
+  "traySwipe": 250,
+  "checks": [
+    "preview snaps before release",
+    "auto scroll during touch drag",
+    "touch swipe keeps placement",
+    "counter remains interactive",
+    "outside drop cancels",
+    "idempotent disposal preserves host siblings",
+    "all seven canonical docs exact"
+  ]
+}

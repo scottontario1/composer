@@ -1,0 +1,164 @@
+[
+  {
+    "width": 320,
+    "metrics": {
+      "title": "Composer · Skill playground",
+      "clientWidth": 320,
+      "scrollWidth": 320,
+      "panels": 7,
+      "slots": 8,
+      "docs": 7,
+      "smallControls": []
+    },
+    "dragState": {
+      "selected": "recall",
+      "slices": 3,
+      "reviewers": 3,
+      "slots": [
+        "recall",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "final": {
+      "selected": "arena",
+      "slices": 3,
+      "reviewers": 3,
+      "slots": [
+        "recall",
+        "architect",
+        "arena",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "errors": [],
+    "checks": [
+      "pointer drag snaps",
+      "tap occupied slot swaps",
+      "undo",
+      "return to tray",
+      "reload persistence",
+      "pointer cancellation",
+      "keyboard placement",
+      "reset undo",
+      "unique SVG IDs"
+    ]
+  },
+  {
+    "width": 390,
+    "metrics": {
+      "title": "Composer · Skill playground",
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "panels": 7,
+      "slots": 8,
+      "docs": 7,
+      "smallControls": []
+    },
+    "dragState": {
+      "selected": "recall",
+      "slices": 3,
+      "reviewers": 3,
+      "slots": [
+        "recall",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "final": {
+      "selected": "arena",
+      "slices": 3,
+      "reviewers": 3,
+      "slots": [
+        "recall",
+        "architect",
+        "arena",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "errors": [],
+    "checks": [
+      "pointer drag snaps",
+      "tap occupied slot swaps",
+      "undo",
+      "return to tray",
+      "reload persistence",
+      "pointer cancellation",
+      "keyboard placement",
+      "reset undo",
+      "unique SVG IDs"
+    ]
+  },
+  {
+    "width": 1440,
+    "metrics": {
+      "title": "Composer · Skill playground",
+      "clientWidth": 1440,
+      "scrollWidth": 1440,
+      "panels": 7,
+      "slots": 8,
+      "docs": 7,
+      "smallControls": []
+    },
+    "dragState": {
+      "selected": "recall",
+      "slices": 3,
+      "reviewers": 3,
+      "slots": [
+        "recall",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "final": {
+      "selected": "arena",
+      "slices": 3,
+      "reviewers": 3,
+      "slots": [
+        "recall",
+        "architect",
+        "arena",
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "errors": [],
+    "checks": [
+      "pointer drag snaps",
+      "tap occupied slot swaps",
+      "undo",
+      "return to tray",
+      "reload persistence",
+      "pointer cancellation",
+      "keyboard placement",
+      "reset undo",
+      "unique SVG IDs"
+    ]
+  }
+]

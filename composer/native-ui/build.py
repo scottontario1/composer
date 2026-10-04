@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import re
 
-NAMES = ('recall', 'architect', 'arena', 'swarm', 'interrogate', 'how')
+NAMES = ('recall', 'architect', 'arena', 'swarm', 'interrogate', 'how', 'resolve')
 
 def build(root, output=None):
     root = Path(root).resolve()

@@ -13,10 +13,10 @@
 <tr><td>390px mobile composition</td><td>Stacked within Architect</td><td>Local horizontal scrolling</td></tr>
 <tr><td>Controls and complete skill documents</td><td>Verified · all six</td><td>Verified · all six</td></tr>
 </tbody></table>
-<div class="controls"><div class="choices" role="group" aria-label="Preview version"><button type="button" data-version="native" aria-pressed="true">Native SVG · selected</button><button type="button" data-version="three" aria-pressed="false">Preserved Three.js</button></div><a id="open-version" href="native-ui/index.html" target="_blank" rel="noopener">Open native UI at full size</a></div>
-<iframe id="preview" src="native-ui/index.html" title="Selected native SVG component showcase"></iframe>
+<div class="controls"><div class="choices" role="group" aria-label="Preview version"><button type="button" data-version="native" aria-pressed="true">Native SVG · selected</button><button type="button" data-version="three" aria-pressed="false">Preserved Three.js</button></div><a id="open-version" href="native-ui/reference.html" target="_blank" rel="noopener">Open native UI at full size</a></div>
+<iframe id="preview" src="native-ui/reference.html" title="Selected native SVG component showcase"></iframe>
 <p class="note">The native page is 91.22% smaller. Its finer border/filigree and mobile layout outweigh the Three.js version’s subtler dark material treatment for this flat UI. Both reproduce the reference procedurally; neither is a pixel-exact copy. File size and context counts are verified; local load observations are not a controlled speed or FPS benchmark. <a href="native-ui/arena-report.md">Read the complete arena and comparison record</a>.</p>
 </main><script>
-const versions={native:{path:'native-ui/index.html',title:'Selected native SVG component showcase',link:'Open native UI at full size'},three:{path:'three-ui/index.html',title:'Preserved Three.js component showcase',link:'Open Three.js UI at full size'}};
+const versions={native:{path:'native-ui/reference.html',title:'Selected native SVG component showcase',link:'Open native UI at full size'},three:{path:'three-ui/index.html',title:'Preserved Three.js component showcase',link:'Open Three.js UI at full size'}};
 document.querySelectorAll('[data-version]').forEach(button=>button.addEventListener('click',()=>{const key=button.dataset.version,version=versions[key];document.querySelectorAll('[data-version]').forEach(item=>item.setAttribute('aria-pressed',String(item===button)));const frame=document.getElementById('preview');frame.src=version.path;frame.title=version.title;const link=document.getElementById('open-version');link.href=version.path;link.textContent=version.link;}));
 </script></body></html>
