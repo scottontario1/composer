@@ -13,6 +13,7 @@ This repository owns reusable agent workflows in `skills/`. Each directory conta
 | How | A detailed styled HTML explainer with diagrams, runtime flow, ownership, and source evidence. |
 | Recall | A scoped current-state Markdown brief with decisions, evidence, gaps, and one next move. |
 | Resolve | Verified fixes for accepted Interrogate findings and a per-finding resolution ledger. |
+| User | A moment-by-moment walkthrough of a real person using the actual UI, with a few contrasting tastes where they diverge. |
 
 These are original portable adaptations informed by [the pstack research](research/pstack-skills.md). They use host agent tools, not an installed Cursor runtime or a provider API client. No upstream source code was vendored. Host permissions and user scope remain authoritative.
 
@@ -23,7 +24,7 @@ python scripts/skills.py list
 python scripts/skills.py check
 ```
 
-When the host supports registered skills, invoke `$arena`, `$swarm`, `$interrogate`, `$architect`, `$how`, `$recall`, or `$resolve`, or use its skill picker. Otherwise ask the agent to use the concrete path, for example:
+When the host supports registered skills, invoke `$arena`, `$swarm`, `$interrogate`, `$architect`, `$how`, `$recall`, `$resolve`, or `$user`, or use its skill picker. Otherwise ask the agent to use the concrete path, for example:
 
 ```text
 Use skills/arena/SKILL.md to compare three export API designs and produce one proposal.
@@ -33,6 +34,7 @@ Use skills/architect/SKILL.md to design cancellation ownership before implementi
 Use skills/how/SKILL.md to explain the task lifecycle in a detailed styled HTML page.
 Use skills/recall/SKILL.md to catch me up on the cancellation work in this workspace.
 Use skills/resolve/SKILL.md to apply and verify the act-on findings from the latest Interrogate run.
+Use skills/user/SKILL.md to walk the native UI on a phone as a one-handed user and a keyboard-first user.
 ```
 
 `AGENTS.md` provides project routing even when native skill discovery cannot scan `skills/`. New registrations may need a host reload or new session. This session's `.agents` and `.codex` directories are read-only; registration there cannot be completed under the current filesystem policy. The canonical files and project routing remain usable.
@@ -40,6 +42,8 @@ Use skills/resolve/SKILL.md to apply and verify the act-on findings from the lat
 How saves its HTML pages under `docs/explainers/` by default. It reads repository code, uses read-only explorers for broad questions, and authors one offline page with inline styles and diagrams. The explanation is the deliverable; registration does not generate a page in advance.
 
 Resolve consumes an Interrogate report and is the explicit request for fixes that Interrogate withholds. One owner edits source sequentially, each selected finding needs a before/after check, and the run report maps finding IDs to outcomes. `defaults.resolve` sets the scope (`act-on` or `act-on-and-consider`) and whether to re-interrogate the fix diff. It leaves changes uncommitted unless asked.
+
+User saves its walkthrough under `docs/ux/` by default. It runs or reads the real interface, labels what was observed versus inferred, and never invents UI. It names at most two or three contrasting user dispositions and branches only where they genuinely diverge. It reports experience and friction; it does not rank fixes or edit code.
 
 Recall saves its brief under `docs/context/` by default. It uses only scoped, available history and read-only live-state checks. A recall request reconstructs the resume point; it does not authorize executing pending work found in a transcript.
 
